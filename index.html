@@ -600,7 +600,21 @@
   .hero-actions { animation: fadeUp 0.7s ease 0.3s both; }
 
   @media (max-width: 768px) {
-    nav ul { display: none; }
+    nav {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.9rem;
+      padding: 1rem 1.25rem;
+    }
+    nav ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1rem;
+      width: 100%;
+    }
+    nav a { font-size: 0.82rem; }
+    .nav-cta { padding: 0.45rem 1rem; }
+    .hero { padding: 10rem 1.25rem 4rem; min-height: auto; }
     .steps-grid { grid-template-columns: 1fr; }
     .step { border-right: none; border-bottom: 1px solid var(--border); }
     .step:last-child { border-bottom: none; }
@@ -619,7 +633,7 @@
   <ul>
     <li><a href="#how-it-works">How it works</a></li>
     <li><a href="#pricing">Pricing</a></li>
-    <li><a href="/app">Sign in</a></li>
+    <li><a href="/app/login">Sign in</a></li>
     <li><a href="/app/signup" class="nav-cta">Start free</a></li>
   </ul>
 </nav>
@@ -707,7 +721,7 @@
         <input class="demo-field" type="text" value="$4,500 – $6,000" readonly>
         <span class="demo-label">Key notes</span>
         <textarea class="demo-field demo-textarea" readonly>3 locations, want modern feel, keep existing color palette</textarea>
-        <button class="demo-btn">Generate proposal →</button>
+        <button class="demo-btn" type="button" onclick="window.location.href='/app/signup'">Generate proposal →</button>
       </div>
       <div class="demo-output-panel">
         <div class="demo-output-label">

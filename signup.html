@@ -43,6 +43,12 @@
   .auth-title { font-family: 'Instrument Serif', serif; font-size: 2rem; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
   .auth-sub { font-size: 0.88rem; color: var(--muted); margin-bottom: 2.5rem; }
   .auth-sub a { color: var(--rust); text-decoration: none; }
+  .plan-note {
+    background: white; border: 1px solid var(--border); border-radius: 2px;
+    padding: 0.85rem 0.95rem; margin-bottom: 1.5rem; font-size: 0.8rem;
+    color: var(--muted); line-height: 1.5;
+  }
+  .plan-note strong { color: var(--ink); }
   label { display: block; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; margin-top: 1.25rem; }
   input[type=text], input[type=email], input[type=password] {
     width: 100%; padding: 0.75rem 0.875rem;
@@ -63,6 +69,7 @@
   .divider::before, .divider::after { content:''; flex:1; height:1px; background: var(--border); }
   .terms { font-size: 0.75rem; color: var(--muted); margin-top: 1.25rem; text-align: center; line-height: 1.5; }
   .terms a { color: var(--rust); text-decoration: none; }
+  .hidden { display: none; }
   @media (max-width: 700px) { .auth-left { display: none; } }
 </style>
 </head>
@@ -77,12 +84,16 @@
 </div>
 <div class="auth-right">
   <div class="auth-form-wrap">
-    <h1 class="auth-title">Create your account</h1>
-    <p class="auth-sub">Already have one? <a href="/app/login">Sign in</a></p>
+    <h1 class="auth-title" id="auth-title">Create your account</h1>
+    <p class="auth-sub" id="auth-sub">Already have one? <a href="/app/login">Sign in</a></p>
 
-    <form id="signup-form" onsubmit="handleSignup(event)">
-      <label for="name">Full name</label>
-      <input type="text" id="name" placeholder="Alex Smith" required>
+    <div class="plan-note hidden" id="plan-note"></div>
+
+    <form id="auth-form" onsubmit="handleAuth(event)">
+      <div id="name-group">
+        <label for="name">Full name</label>
+        <input type="text" id="name" placeholder="Alex Smith" required>
+      </div>
 
       <label for="email">Email address</label>
       <input type="email" id="email" placeholder="alex@studio.co" required>
@@ -90,31 +101,85 @@
       <label for="password">Password</label>
       <input type="password" id="password" placeholder="Min. 8 characters" required minlength="8">
 
-      <label for="profession">What kind of work do you do?</label>
-      <input type="text" id="profession" placeholder="e.g. Brand designer, developer, consultant">
+      <div id="profession-group">
+        <label for="profession">What kind of work do you do?</label>
+        <input type="text" id="profession" placeholder="e.g. Brand designer, developer, consultant">
+      </div>
 
-      <button type="submit" class="btn-full" id="signup-btn">Create account →</button>
+      <button type="submit" class="btn-full" id="auth-btn">Create account →</button>
     </form>
 
     <p class="terms">By signing up you agree to our <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a></p>
   </div>
 </div>
 <script>
-async function handleSignup(e) {
+const path = window.location.pathname;
+const params = new URLSearchParams(window.location.search);
+const selectedPlan = params.get('plan');
+const isLoginMode = path === '/app/login' || path === '/app';
+
+function applyMode() {
+  const title = document.getElementById('auth-title');
+  const sub = document.getElementById('auth-sub');
+  const nameGroup = document.getElementById('name-group');
+  const professionGroup = document.getElementById('profession-group');
+  const nameInput = document.getElementById('name');
+  const professionInput = document.getElementById('profession');
+  const passwordInput = document.getElementById('password');
+  const button = document.getElementById('auth-btn');
+  const terms = document.querySelector('.terms');
+  const planNote = document.getElementById('plan-note');
+
+  if (isLoginMode) {
+    document.title = 'DraftBox — Sign in';
+    title.textContent = 'Welcome back';
+    sub.innerHTML = 'Need an account? <a href="/app/signup">Create one</a>';
+    button.textContent = 'Sign in →';
+    nameGroup.classList.add('hidden');
+    professionGroup.classList.add('hidden');
+    nameInput.required = false;
+    professionInput.required = false;
+    passwordInput.removeAttribute('minlength');
+    terms.classList.add('hidden');
+  } else {
+    document.title = 'DraftBox — Sign up';
+    title.textContent = 'Create your account';
+    sub.innerHTML = 'Already have one? <a href="/app/login">Sign in</a>';
+    button.textContent = 'Create account →';
+    nameGroup.classList.remove('hidden');
+    professionGroup.classList.remove('hidden');
+    nameInput.required = true;
+    passwordInput.setAttribute('minlength', '8');
+    terms.classList.remove('hidden');
+  }
+
+  if (selectedPlan && !isLoginMode) {
+    const planName = selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1);
+    planNote.classList.remove('hidden');
+    planNote.innerHTML = `<strong>${planName} plan selected.</strong> Create your account and DraftBox will start you on that plan.`;
+  }
+}
+
+async function handleAuth(e) {
   e.preventDefault();
-  const btn = document.getElementById('signup-btn');
-  btn.textContent = 'Creating account...';
+  const btn = document.getElementById('auth-btn');
+  const defaultText = isLoginMode ? 'Sign in →' : 'Create account →';
+  btn.textContent = isLoginMode ? 'Signing in...' : 'Creating account...';
   btn.disabled = true;
 
   const data = {
-    name: document.getElementById('name').value,
     email: document.getElementById('email').value,
-    password: document.getElementById('password').value,
-    profession: document.getElementById('profession').value
+    password: document.getElementById('password').value
   };
 
+  if (!isLoginMode) {
+    data.name = document.getElementById('name').value;
+    data.profession = document.getElementById('profession').value;
+    data.plan = selectedPlan || 'free';
+  }
+
   try {
-    const res = await fetch('/api/auth/signup', {
+    const res = await fetch(isLoginMode ? '/api/auth/login' : '/api/auth/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -125,16 +190,18 @@ async function handleSignup(e) {
       localStorage.setItem('draftbox_user', JSON.stringify(result.user));
       window.location.href = '/app/dashboard';
     } else {
-      btn.textContent = 'Create account →';
+      btn.textContent = defaultText;
       btn.disabled = false;
       alert(result.error || 'Something went wrong. Please try again.');
     }
   } catch {
-    btn.textContent = 'Create account →';
+    btn.textContent = defaultText;
     btn.disabled = false;
     alert('Network error. Please try again.');
   }
 }
+
+applyMode();
 </script>
 </body>
 </html>

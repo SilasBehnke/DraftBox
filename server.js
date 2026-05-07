@@ -13,6 +13,8 @@ app.use(express.json());
 const JWT_SECRET = process.env.JWT_SECRET || 'draftbox_secret_change_in_prod';
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const PORT = process.env.PORT || 3000;
+const ROOT_DIR = __dirname;
+const VALID_PLANS = new Set(['free', 'solo', 'pro']);
 
 // ─── SIMPLE FILE-BASED DB ──────────────────────────────────
 const DB_FILE = path.join(__dirname, 'data', 'db.json');
@@ -46,20 +48,25 @@ function authMiddleware(req, res, next) {
 }
 
 // ─── ROUTES ───────────────────────────────────────────────
+function sendPage(res, file) {
+  res.sendFile(path.join(ROOT_DIR, file));
+}
 
-// Serve static files
-app.use(express.static(path.join(__dirname, 'landing')));
-app.use('/app', express.static(path.join(__dirname, 'app')));
+app.get('/', (req, res) => sendPage(res, 'index.html'));
+app.get('/privacy', (req, res) => sendPage(res, 'privacy.html'));
+app.get('/terms', (req, res) => sendPage(res, 'terms.html'));
+app.get('/app', (req, res) => res.redirect('/app/login'));
+app.get('/app/signup', (req, res) => sendPage(res, 'signup.html'));
+app.get('/app/login', (req, res) => sendPage(res, 'signup.html'));
+app.get('/app/dashboard', (req, res) => sendPage(res, 'dashboard.html'));
 
-app.get('/app/signup', (req, res) => res.sendFile(path.join(__dirname, 'app', 'signup.html')));
-app.get('/app/login', (req, res) => res.sendFile(path.join(__dirname, 'app', 'signup.html')));
-app.get('/app/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'app', 'dashboard.html')));
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'landing', 'index.html')));
+// Serve any additional static files from the project root.
+app.use(express.static(ROOT_DIR, { index: false }));
 
 // SIGNUP
 app.post('/api/auth/signup', async (req, res) => {
   try {
-    const { name, email, password, profession } = req.body;
+    const { name, email, password, profession, plan } = req.body;
     if (!name || !email || !password) return res.status(400).json({ error: 'Missing required fields' });
 
     const db = readDB();
@@ -68,12 +75,13 @@ app.post('/api/auth/signup', async (req, res) => {
     }
 
     const hashed = await bcrypt.hash(password, 10);
-    const user = { id: 'u_' + Date.now(), name, email, password: hashed, profession: profession || '', plan: 'free', created: Date.now() };
+    const selectedPlan = VALID_PLANS.has(plan) ? plan : 'free';
+    const user = { id: 'u_' + Date.now(), name, email, password: hashed, profession: profession || '', plan: selectedPlan, created: Date.now() };
     db.users.push(user);
     writeDB(db);
 
     const token = jwt.sign({ id: user.id, email, plan: user.plan }, JWT_SECRET, { expiresIn: '30d' });
-    res.json({ success: true, token, user: { id: user.id, name, email, plan: user.plan, profession } });
+    res.json({ success: true, token, user: { id: user.id, name, email, plan: user.plan, profession: user.profession } });
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
   }
@@ -92,6 +100,40 @@ app.post('/api/auth/login', async (req, res) => {
 
     const token = jwt.sign({ id: user.id, email, plan: user.plan }, JWT_SECRET, { expiresIn: '30d' });
     res.json({ success: true, token, user: { id: user.id, name: user.name, email, plan: user.plan, profession: user.profession } });
+  } catch {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// PLAN UPGRADE (demo-friendly billing placeholder)
+app.post('/api/account/plan', authMiddleware, async (req, res) => {
+  try {
+    const { plan } = req.body;
+    if (!VALID_PLANS.has(plan) || plan === 'free') {
+      return res.status(400).json({ error: 'Invalid plan selection' });
+    }
+
+    if (req.user.id === 'demo') {
+      return res.json({
+        success: true,
+        user: { id: 'demo', name: 'Demo User', email: 'demo@draftbox.app', profession: 'Freelancer', plan },
+        token: 'demo'
+      });
+    }
+
+    const db = readDB();
+    const user = db.users.find(entry => entry.id === req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    user.plan = plan;
+    writeDB(db);
+
+    const token = jwt.sign({ id: user.id, email: user.email, plan: user.plan }, JWT_SECRET, { expiresIn: '30d' });
+    res.json({
+      success: true,
+      token,
+      user: { id: user.id, name: user.name, email: user.email, profession: user.profession, plan: user.plan }
+    });
   } catch {
     res.status(500).json({ error: 'Server error' });
   }

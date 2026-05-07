@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DraftBox — Privacy Policy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0d;
+    --paper: #f5f2ec;
+    --cream: #ede9e0;
+    --rust: #c2531a;
+    --muted: #6f6a64;
+    --border: #d8d3ca;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: linear-gradient(180deg, var(--paper) 0%, #f0ebe2 100%);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+  .shell {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+  .topbar, .footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .logo {
+    color: var(--ink);
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.35rem;
+    text-decoration: none;
+  }
+  .logo span { color: var(--rust); }
+  .topbar a, .footer a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+  .card {
+    margin-top: 3rem;
+    background: rgba(255,255,255,0.82);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 2.25rem;
+    backdrop-filter: blur(14px);
+  }
+  h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(2.2rem, 4vw, 3.5rem);
+    letter-spacing: -0.03em;
+    margin-bottom: 0.75rem;
+  }
+  .lede, .meta {
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .meta { margin-bottom: 2rem; font-size: 0.88rem; }
+  section { margin-top: 1.8rem; }
+  h2 {
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.7rem;
+  }
+  p, li {
+    color: #2a2723;
+    line-height: 1.8;
+    font-size: 0.98rem;
+  }
+  ul { padding-left: 1.15rem; }
+  .footer {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+  @media (max-width: 700px) {
+    .card { padding: 1.5rem; border-radius: 18px; }
+    .topbar, .footer { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <a href="/" class="logo">Draft<span>Box</span></a>
+      <a href="/app/signup">Start free</a>
+    </div>
+
+    <article class="card">
+      <h1>Privacy Policy</h1>
+      <p class="lede">DraftBox is built to help freelancers draft client-facing documents faster. This page explains, in plain language, what data the current app stores and how it is used.</p>
+      <p class="meta">Last updated: May 6, 2026</p>
+
+      <section>
+        <h2>What We Collect</h2>
+        <p>The app stores the account details you provide at signup, the plan you select, and the document metadata needed to show your dashboard history. During local demo use, some document state is also stored in your browser's local storage.</p>
+      </section>
+
+      <section>
+        <h2>How It Is Used</h2>
+        <p>Your information is used to sign you in, track your selected plan, and generate or save document drafts. If an AI API key is configured on the server, document details may be sent to that provider so DraftBox can generate content for you.</p>
+      </section>
+
+      <section>
+        <h2>Storage</h2>
+        <p>This build uses a simple file-backed datastore on the server and browser local storage on the client. It is suitable for prototype use and internal testing, but it is not intended to be treated as a hardened production deployment.</p>
+      </section>
+
+      <section>
+        <h2>Your Choices</h2>
+        <p>You can stop using the app at any time, clear your local browser data, or contact the site owner to remove server-side records from the prototype datastore.</p>
+      </section>
+
+      <div class="footer">
+        <a href="/terms">Terms of Service</a>
+        <a href="/">Back to home</a>
+      </div>
+    </article>
+  </div>
+</body>
+</html>
