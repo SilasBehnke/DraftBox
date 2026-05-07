@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DraftBox — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0d; --paper: #f5f2ec; --cream: #ede9e0;
+    --rust: #c2531a; --rust-dark: #9e4113; --muted: #7a756e;
+    --border: #d8d3ca; --white: #ffffff;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--cream); color: var(--ink); font-family: 'DM Sans', sans-serif; font-weight: 300; min-height: 100vh; }
+
+  /* LAYOUT */
+  .app-layout { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 220px; background: var(--ink); padding: 1.5rem 1rem;
+    display: flex; flex-direction: column; gap: 0.25rem;
+    position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto;
+  }
+  .sidebar-logo { font-family: 'Instrument Serif', serif; font-size: 1.3rem; color: var(--paper); text-decoration: none; padding: 0.5rem 0.75rem; margin-bottom: 1.5rem; display: block; }
+  .sidebar-logo span { color: #e8956b; }
+  .sidebar-section { font-size: 0.65rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(245,242,236,0.3); padding: 0.5rem 0.75rem; margin-top: 1rem; }
+  .sidebar-link {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.6rem 0.75rem; border-radius: 3px;
+    color: rgba(245,242,236,0.55); text-decoration: none;
+    font-size: 0.875rem; font-weight: 400; transition: all 0.15s;
+    cursor: pointer; border: none; background: none; width: 100%; text-align: left;
+  }
+  .sidebar-link:hover, .sidebar-link.active { background: rgba(245,242,236,0.08); color: var(--paper); }
+  .sidebar-link.active { color: #e8956b; }
+  .sidebar-icon { width: 16px; height: 16px; opacity: 0.7; }
+  .sidebar-bottom { margin-top: auto; border-top: 1px solid rgba(245,242,236,0.1); padding-top: 1rem; }
+  .user-pill {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.6rem 0.75rem; color: rgba(245,242,236,0.55); font-size: 0.8rem;
+  }
+  .user-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--rust); display: flex; align-items: center;
+    justify-content: center; font-size: 0.7rem; font-weight: 500; color: white;
+    flex-shrink: 0;
+  }
+  .upgrade-card {
+    background: rgba(194,83,26,0.15); border: 1px solid rgba(194,83,26,0.3);
+    border-radius: 4px; padding: 1rem; margin: 1rem 0 0.5rem;
+  }
+  .upgrade-card p { font-size: 0.78rem; color: rgba(245,242,236,0.6); line-height: 1.5; margin-bottom: 0.75rem; }
+  .upgrade-btn {
+    background: var(--rust); color: white; border: none; width: 100%;
+    padding: 0.5rem; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.05em;
+    text-transform: uppercase; border-radius: 2px; cursor: pointer;
+  }
+  .upgrade-btn:hover { background: var(--rust-dark); }
+  .docs-used { font-size: 0.7rem; color: rgba(245,242,236,0.3); text-align: center; margin-top: 0.5rem; }
+
+  /* MAIN CONTENT */
+  .main { margin-left: 220px; padding: 2.5rem; flex: 1; }
+
+  /* TOP BAR */
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2.5rem; }
+  .page-title { font-family: 'Instrument Serif', serif; font-size: 1.75rem; letter-spacing: -0.02em; }
+  .btn-new {
+    background: var(--rust); color: white; border: none; padding: 0.65rem 1.5rem;
+    border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+    font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase;
+    cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: background 0.2s;
+  }
+  .btn-new:hover { background: var(--rust-dark); }
+
+  /* STATS ROW */
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+  .stat-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 3px; padding: 1.25rem 1.5rem;
+  }
+  .stat-label { font-size: 0.72rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+  .stat-value { font-family: 'Instrument Serif', serif; font-size: 2.25rem; letter-spacing: -0.02em; line-height: 1; }
+  .stat-sub { font-size: 0.78rem; color: var(--muted); margin-top: 0.25rem; }
+
+  /* DOCUMENTS GRID */
+  .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .section-head h2 { font-size: 0.85rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
+  .doc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+  .doc-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 3px; padding: 1.25rem; cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    position: relative;
+  }
+  .doc-card:hover { border-color: var(--rust); box-shadow: 0 4px 16px rgba(15,14,13,0.06); }
+  .doc-type-badge {
+    display: inline-block; font-size: 0.65rem; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase; padding: 0.2rem 0.6rem;
+    border-radius: 2px; margin-bottom: 0.75rem;
+  }
+  .badge-proposal { background: #fef3e2; color: #92400e; }
+  .badge-email { background: #e8f5e9; color: #1b5e20; }
+  .badge-sow { background: #e8eaf6; color: #1a237e; }
+  .badge-brief { background: #fce4ec; color: #880e4f; }
+  .doc-title { font-family: 'Instrument Serif', serif; font-size: 1.05rem; letter-spacing: -0.01em; margin-bottom: 0.4rem; line-height: 1.3; }
+  .doc-client { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.75rem; }
+  .doc-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 0.75rem; }
+  .doc-date { font-size: 0.72rem; color: var(--muted); }
+  .doc-actions { display: flex; gap: 0.5rem; }
+  .doc-btn {
+    font-size: 0.7rem; padding: 0.25rem 0.6rem; border-radius: 2px;
+    cursor: pointer; border: 1px solid var(--border); background: none;
+    color: var(--muted); transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+  }
+  .doc-btn:hover { background: var(--cream); color: var(--ink); }
+  .empty-state {
+    grid-column: 1/-1; text-align: center; padding: 4rem 2rem;
+    border: 1px dashed var(--border); border-radius: 3px; color: var(--muted);
+  }
+  .empty-title { font-family: 'Instrument Serif', serif; font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--ink); }
+  .empty-sub { font-size: 0.88rem; margin-bottom: 1.5rem; }
+  .btn-ghost {
+    border: 1px solid var(--ink); background: none; color: var(--ink);
+    padding: 0.6rem 1.5rem; border-radius: 2px; font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-ghost:hover { background: var(--ink); color: var(--paper); }
+
+  /* NEW DOC MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(15,14,13,0.55);
+    z-index: 200; display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--paper); border: 1px solid var(--border);
+    border-radius: 4px; width: 100%; max-width: 680px;
+    max-height: 90vh; overflow-y: auto;
+    transform: translateY(16px); transition: transform 0.2s;
+    box-shadow: 0 32px 80px rgba(15,14,13,0.2);
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-header {
+    padding: 1.75rem 2rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; justify-content: space-between;
+  }
+  .modal-header h2 { font-family: 'Instrument Serif', serif; font-size: 1.5rem; letter-spacing: -0.02em; }
+  .modal-header p { font-size: 0.85rem; color: var(--muted); margin-top: 0.2rem; }
+  .modal-close { background: none; border: none; cursor: pointer; font-size: 1.25rem; color: var(--muted); padding: 0.25rem; transition: color 0.15s; }
+  .modal-close:hover { color: var(--ink); }
+  .modal-body { padding: 1.75rem 2rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-group { margin-bottom: 1.25rem; }
+  .form-group label { display: block; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 0.7rem 0.875rem;
+    background: white; border: 1px solid var(--border); border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--ink);
+    outline: none; transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--rust); }
+  .form-group textarea { resize: vertical; min-height: 90px; }
+  .form-group select { cursor: pointer; }
+  .modal-footer { padding: 1.25rem 2rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 1rem; }
+  .btn-cancel { background: none; border: 1px solid var(--border); color: var(--muted); padding: 0.65rem 1.5rem; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; cursor: pointer; transition: all 0.15s; }
+  .btn-cancel:hover { border-color: var(--ink); color: var(--ink); }
+  .btn-generate {
+    background: var(--rust); color: white; border: none; padding: 0.65rem 1.75rem;
+    border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+    font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .btn-generate:hover { background: var(--rust-dark); }
+  .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* DOCUMENT VIEWER */
+  .doc-viewer {
+    position: fixed; inset: 0; background: var(--paper);
+    z-index: 300; overflow-y: auto;
+    transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  .doc-viewer.open { transform: translateX(0); }
+  .doc-viewer-header {
+    position: sticky; top: 0; background: rgba(245,242,236,0.95);
+    backdrop-filter: blur(12px); border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; z-index: 10;
+  }
+  .doc-viewer-actions { display: flex; gap: 0.75rem; align-items: center; }
+  .btn-icon { background: none; border: 1px solid var(--border); border-radius: 2px; padding: 0.45rem 0.875rem; cursor: pointer; font-size: 0.78rem; font-family: 'DM Sans', sans-serif; color: var(--ink); transition: all 0.15s; display: flex; align-items: center; gap: 0.4rem; }
+  .btn-icon:hover { background: var(--cream); }
+  .btn-icon.primary { background: var(--rust); color: white; border-color: var(--rust); }
+  .btn-icon.primary:hover { background: var(--rust-dark); }
+  .doc-content { max-width: 720px; margin: 0 auto; padding: 4rem 2rem; }
+  #doc-editor {
+    font-family: 'DM Sans', sans-serif; font-size: 0.95rem; line-height: 1.8;
+    color: var(--ink); border: none; outline: none; background: transparent;
+    width: 100%; resize: none; min-height: 500px;
+    white-space: pre-wrap; word-wrap: break-word;
+  }
+  .generating-indicator {
+    display: flex; align-items: center; gap: 0.75rem;
+    font-size: 0.85rem; color: var(--muted); padding: 2rem 0;
+  }
+  .gen-dots span {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--rust); margin: 0 2px;
+    animation: genDot 1.2s ease-in-out infinite;
+  }
+  .gen-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .gen-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes genDot { 0%,80%,100%{transform:scale(0.6);opacity:0.4} 40%{transform:scale(1);opacity:1} }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem; background: var(--ink);
+    color: var(--paper); padding: 0.875rem 1.25rem; border-radius: 3px;
+    font-size: 0.85rem; z-index: 500;
+    transform: translateY(20px); opacity: 0; transition: all 0.25s;
+    pointer-events: none;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+<div class="app-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="/" class="sidebar-logo">Draft<span>Box</span></a>
+
+    <button class="sidebar-link active" onclick="showDashboard()">
+      <svg class="sidebar-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+      Dashboard
+    </button>
+    <button class="sidebar-link" onclick="openNewDoc()">
+      <svg class="sidebar-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1v14M1 8h14"/></svg>
+      New document
+    </button>
+    <button class="sidebar-link" onclick="showVoice()">
+      <svg class="sidebar-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1a3 3 0 0 0-3 3v4a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M2 8a6 6 0 0 0 12 0M8 14v2"/></svg>
+      Voice training
+    </button>
+
+    <span class="sidebar-section">Library</span>
+    <button class="sidebar-link" onclick="filterDocs('proposal')">Proposals</button>
+    <button class="sidebar-link" onclick="filterDocs('sow')">SOWs</button>
+    <button class="sidebar-link" onclick="filterDocs('email')">Emails</button>
+    <button class="sidebar-link" onclick="filterDocs('brief')">Briefs</button>
+
+    <div class="sidebar-bottom">
+      <div id="upgrade-section">
+        <div class="upgrade-card">
+          <p>You're on the free plan.<br><strong style="color:var(--paper)">5 documents</strong> remaining.</p>
+          <button class="upgrade-btn" onclick="showUpgrade()">Upgrade to Solo →</button>
+        </div>
+        <p class="docs-used" id="docs-used-label">0 of 5 used</p>
+      </div>
+      <div class="user-pill">
+        <div class="user-avatar" id="user-avatar">?</div>
+        <div>
+          <div style="font-size:0.8rem;color:rgba(245,242,236,0.8)" id="user-name">Loading...</div>
+          <div style="font-size:0.72rem;color:rgba(245,242,236,0.4)" id="user-plan">Free plan</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="main-content">
+    <div class="topbar">
+      <h1 class="page-title">Your documents</h1>
+      <button class="btn-new" onclick="openNewDoc()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 1v12M1 7h12"/></svg>
+        New document
+      </button>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <p class="stat-label">Documents created</p>
+        <p class="stat-value" id="stat-total">0</p>
+        <p class="stat-sub">all time</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">This month</p>
+        <p class="stat-value" id="stat-month">0</p>
+        <p class="stat-sub">documents</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Most used type</p>
+        <p class="stat-value" id="stat-type" style="font-size:1.5rem; margin-top:0.25rem">—</p>
+        <p class="stat-sub">&nbsp;</p>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <h2 id="docs-section-title">Recent documents</h2>
+    </div>
+    <div class="doc-grid" id="doc-grid">
+      <!-- Populated by JS -->
+    </div>
+  </main>
+</div>
+
+<!-- NEW DOC MODAL -->
+<div class="modal-overlay" id="new-doc-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2>Create new document</h2>
+        <p>Fill in the details and DraftBox will write your first draft</p>
+      </div>
+      <button class="modal-close" onclick="closeNewDoc()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Document type</label>
+          <select id="doc-type">
+            <option value="proposal">Project Proposal</option>
+            <option value="sow">Statement of Work (SOW)</option>
+            <option value="email">Client Email</option>
+            <option value="brief">Project Brief</option>
+            <option value="followup">Follow-up Email</option>
+            <option value="cold">Cold Outreach</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Client / Company name</label>
+          <input type="text" id="client-name" placeholder="e.g. Meridian Coffee Co.">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Project type</label>
+          <input type="text" id="project-type" placeholder="e.g. Brand identity redesign">
+        </div>
+        <div class="form-group">
+          <label>Budget range</label>
+          <input type="text" id="budget" placeholder="e.g. $3,000–$5,000">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Key details & notes</label>
+        <textarea id="notes" placeholder="Timeline, deliverables, special requirements, tone, anything relevant..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Your name / business</label>
+        <input type="text" id="sender-name" placeholder="e.g. Alex Smith — Craft Studio">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeNewDoc()">Cancel</button>
+      <button class="btn-generate" id="generate-btn" onclick="generateDocument()">Generate document →</button>
+    </div>
+  </div>
+</div>
+
+<!-- DOCUMENT VIEWER -->
+<div class="doc-viewer" id="doc-viewer">
+  <div class="doc-viewer-header">
+    <div style="display:flex;align-items:center;gap:1rem">
+      <button class="btn-icon" onclick="closeViewer()">← Back</button>
+      <span id="viewer-title" style="font-family:'Instrument Serif',serif;font-size:1.1rem;letter-spacing:-0.01em"></span>
+    </div>
+    <div class="doc-viewer-actions">
+      <button class="btn-icon" onclick="copyDoc()">Copy text</button>
+      <button class="btn-icon" onclick="downloadDoc()">Download .txt</button>
+      <button class="btn-icon primary" onclick="regenerateDoc()">Regenerate ↻</button>
+    </div>
+  </div>
+  <div class="doc-content">
+    <div id="generating-state" class="generating-indicator" style="display:none">
+      <div class="gen-dots"><span></span><span></span><span></span></div>
+      Writing your document...
+    </div>
+    <textarea id="doc-editor" spellcheck="true"></textarea>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ========== STATE ==========
+let docs = JSON.parse(localStorage.getItem('draftbox_docs') || '[]');
+let user = JSON.parse(localStorage.getItem('draftbox_user') || 'null');
+let currentDoc = null;
+let currentFilter = null;
+
+// ========== AUTH CHECK ==========
+if (!user && window.location.pathname.includes('dashboard')) {
+  // Allow demo mode without login
+  user = { name: 'Demo User', email: 'demo@draftbox.app', plan: 'free', profession: 'Freelancer' };
+}
+
+// ========== INIT ==========
+function init() {
+  if (user) {
+    const initials = user.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+    document.getElementById('user-avatar').textContent = initials;
+    document.getElementById('user-name').textContent = user.name;
+    document.getElementById('user-plan').textContent = user.plan === 'solo' ? 'Solo plan' : user.plan === 'pro' ? 'Pro plan' : 'Free plan';
+    document.getElementById('sender-name').value = user.name;
+  }
+  renderDocs();
+  updateStats();
+  updateUsage();
+}
+
+// ========== DOCS ==========
+function renderDocs(filter) {
+  const grid = document.getElementById('doc-grid');
+  let filtered = filter ? docs.filter(d => d.type === filter) : docs;
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <h3 class="empty-title">No documents yet</h3>
+        <p class="empty-sub">Create your first document in under 60 seconds</p>
+        <button class="btn-ghost" onclick="openNewDoc()">Create document →</button>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.sort((a,b) => b.created - a.created).map(doc => `
+    <div class="doc-card" onclick="openDoc('${doc.id}')">
+      <span class="doc-type-badge badge-${doc.type}">${typeLabel(doc.type)}</span>
+      <h3 class="doc-title">${escHtml(doc.title)}</h3>
+      <p class="doc-client">${escHtml(doc.client)}</p>
+      <div class="doc-footer">
+        <span class="doc-date">${formatDate(doc.created)}</span>
+        <div class="doc-actions" onclick="event.stopPropagation()">
+          <button class="doc-btn" onclick="copyDocById('${doc.id}')">Copy</button>
+          <button class="doc-btn" onclick="deleteDoc('${doc.id}')">Delete</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateStats() {
+  document.getElementById('stat-total').textContent = docs.length;
+  const thisMonth = docs.filter(d => {
+    const docDate = new Date(d.created);
+    const now = new Date();
+    return docDate.getMonth() === now.getMonth() && docDate.getFullYear() === now.getFullYear();
+  }).length;
+  document.getElementById('stat-month').textContent = thisMonth;
+
+  if (docs.length > 0) {
+    const typeCounts = {};
+    docs.forEach(d => typeCounts[d.type] = (typeCounts[d.type] || 0) + 1);
+    const topType = Object.entries(typeCounts).sort((a,b)=>b[1]-a[1])[0][0];
+    document.getElementById('stat-type').textContent = typeLabel(topType);
+  }
+}
+
+function updateUsage() {
+  const used = docs.length;
+  const limit = user?.plan === 'free' ? 5 : user?.plan === 'solo' ? 20 : 999;
+  const remaining = Math.max(0, limit - used);
+  document.getElementById('docs-used-label').textContent = `${used} of ${limit === 999 ? '∞' : limit} used`;
+  if (user?.plan !== 'free') {
+    document.getElementById('upgrade-section').style.display = 'none';
+  }
+}
+
+function filterDocs(type) {
+  currentFilter = type;
+  document.getElementById('docs-section-title').textContent = typeLabel(type) + 's';
+  renderDocs(type);
+}
+
+function showDashboard() {
+  currentFilter = null;
+  document.getElementById('docs-section-title').textContent = 'Recent documents';
+  renderDocs();
+}
+
+// ========== NEW DOC MODAL ==========
+function openNewDoc() {
+  document.getElementById('new-doc-modal').classList.add('open');
+}
+function closeNewDoc() {
+  document.getElementById('new-doc-modal').classList.remove('open');
+}
+
+// ========== GENERATE ==========
+async function generateDocument() {
+  const type = document.getElementById('doc-type').value;
+  const client = document.getElementById('client-name').value.trim();
+  const project = document.getElementById('project-type').value.trim();
+  const budget = document.getElementById('budget').value.trim();
+  const notes = document.getElementById('notes').value.trim();
+  const sender = document.getElementById('sender-name').value.trim();
+
+  if (!client || !project) {
+    showToast('Please fill in the client name and project type.');
+    return;
+  }
+
+  // Check usage limit for free plan
+  if ((user?.plan === 'free' || !user?.plan) && docs.length >= 5) {
+    showToast('Free plan limit reached. Upgrade to continue.');
+    showUpgrade();
+    return;
+  }
+
+  const btn = document.getElementById('generate-btn');
+  btn.textContent = 'Generating...';
+  btn.disabled = true;
+
+  closeNewDoc();
+
+  // Create doc entry
+  const docId = 'doc_' + Date.now();
+  const docTitle = `${typeLabel(type)} — ${client}`;
+
+  // Open viewer with loading state
+  currentDoc = { id: docId, type, title: docTitle, client, project, budget, notes, sender, created: Date.now(), content: '' };
+
+  openViewer(currentDoc, true);
+
+  // Call API
+  try {
+    const token = localStorage.getItem('draftbox_token');
+    const response = await fetch('/api/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token || 'demo'}`
+      },
+      body: JSON.stringify({ type, client, project, budget, notes, sender, profession: user?.profession })
+    });
+
+    if (!response.ok) throw new Error('API error');
+
+    const result = await response.json();
+    const content = result.content;
+
+    currentDoc.content = content;
+    docs.unshift(currentDoc);
+    localStorage.setItem('draftbox_docs', JSON.stringify(docs));
+
+    // Show in editor
+    document.getElementById('generating-state').style.display = 'none';
+    const editor = document.getElementById('doc-editor');
+    editor.style.display = 'block';
+    // Typewriter effect
+    await typeWriter(editor, content);
+
+    updateStats();
+    updateUsage();
+    renderDocs();
+
+  } catch (err) {
+    // Fallback: generate client-side demo content
+    console.error(err);
+    const fallback = generateFallbackDoc(type, client, project, budget, notes, sender);
+    currentDoc.content = fallback;
+    docs.unshift(currentDoc);
+    localStorage.setItem('draftbox_docs', JSON.stringify(docs));
+
+    document.getElementById('generating-state').style.display = 'none';
+    const editor = document.getElementById('doc-editor');
+    editor.style.display = 'block';
+    await typeWriter(editor, fallback);
+    updateStats(); updateUsage(); renderDocs();
+  }
+
+  btn.textContent = 'Generate document →';
+  btn.disabled = false;
+}
+
+async function typeWriter(el, text) {
+  el.value = '';
+  const speed = Math.max(4, Math.floor(3000 / text.length));
+  for (let i = 0; i < text.length; i++) {
+    el.value += text[i];
+    el.scrollTop = el.scrollHeight;
+    if (i % 8 === 0) await new Promise(r => setTimeout(r, speed));
+  }
+}
+
+function generateFallbackDoc(type, client, project, budget, notes, sender) {
+  const today = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  const senderName = sender || 'Your Name';
+
+  if (type === 'proposal') {
+    return `PROJECT PROPOSAL
+${client} — ${project}
+Prepared by ${senderName} | ${today}
+
+──────────────────────────────────────
+
+Dear ${client} team,
+
+Thank you for the opportunity to present this proposal for ${project}. Having reviewed your requirements, I'm confident we can deliver exceptional results that meet your goals and timeline.
+
+PROJECT OVERVIEW
+
+This engagement focuses on ${project.toLowerCase()} for ${client}. Based on our initial conversations and your stated objectives, I've outlined a comprehensive approach that prioritizes quality, clear communication, and measurable outcomes.
+
+${notes ? 'PROJECT CONTEXT\n\n' + notes + '\n\n' : ''}PROPOSED SCOPE OF WORK
+
+Phase 1 — Discovery & Strategy (Week 1–2)
+• In-depth kickoff call and stakeholder interviews
+• Research and competitive landscape review
+• Strategic brief and project roadmap
+
+Phase 2 — Design & Development (Week 3–6)
+• Concept development and initial presentation
+• Two rounds of revisions based on feedback
+• Refinement and finalization of all deliverables
+
+Phase 3 — Delivery & Handoff (Week 7–8)
+• Final deliverables packaged and delivered
+• Documentation and usage guidelines
+• 30-day post-launch support window
+
+INVESTMENT
+
+${budget ? 'Project fee: ' + budget : 'Detailed pricing available upon request'}
+
+A 50% deposit is required to begin work, with the remaining 50% due upon final delivery. Payment accepted via bank transfer or major credit card.
+
+TIMELINE
+
+This project is estimated at 6–8 weeks from signed agreement. I'm able to begin within 5 business days of deposit receipt.
+
+WHY WORK WITH ME
+
+I bring focus, craft, and clear communication to every project. You'll have direct access to me throughout — no account managers, no handoffs. I've helped clients across similar industries achieve tangible results, and I'll bring that same commitment to ${client}.
+
+NEXT STEPS
+
+If this proposal aligns with your vision, please reply to this email or sign the attached agreement. I'm happy to answer any questions on a quick call.
+
+Looking forward to the possibility of working together.
+
+Warm regards,
+${senderName}`;
+  }
+
+  if (type === 'email' || type === 'followup') {
+    return `Subject: ${project} — Next Steps for ${client}
+
+Hi there,
+
+I hope this message finds you well. I'm writing regarding ${project} for ${client}.
+
+${notes || 'I wanted to follow up on our recent conversation and share some thoughts on how we might move forward.'}
+
+Based on what we've discussed, I believe the best path forward would be to ${budget ? 'work within a budget of ' + budget + ' to' : 'take the time to'} ensure we achieve the outcomes you're looking for.
+
+I'd love to schedule a brief 20-minute call this week to align on priorities and answer any questions you might have. Would Tuesday or Wednesday work for you?
+
+Looking forward to connecting.
+
+Best,
+${senderName}`;
+  }
+
+  if (type === 'sow') {
+    return `STATEMENT OF WORK
+${client} × ${senderName}
+${today}
+
+PROJECT: ${project}
+
+──────────────────────────────────────
+
+1. PARTIES
+
+This Statement of Work is entered into between ${senderName} ("Service Provider") and ${client} ("Client").
+
+2. PROJECT OVERVIEW
+
+${project} as discussed and agreed upon in preliminary conversations. ${notes || ''}
+
+3. DELIVERABLES
+
+The Service Provider agrees to deliver the following:
+• Primary deliverables as scoped in project brief
+• All working files and source materials upon completion
+• Documentation as applicable to the project type
+
+4. TIMELINE
+
+Project commencement: Within 5 business days of signed SOW and deposit
+Estimated completion: As agreed in project schedule
+Milestones and checkpoints to be agreed upon kickoff
+
+5. INVESTMENT & PAYMENT
+
+${budget ? 'Total project fee: ' + budget : 'To be agreed upon project confirmation'}
+• 50% deposit due before work commences
+• 50% balance due upon project completion
+• Late payments subject to 1.5% monthly fee
+
+6. REVISIONS
+
+This engagement includes two rounds of revisions. Additional revisions billed at hourly rate.
+
+7. OWNERSHIP
+
+Upon receipt of final payment, all deliverables become the property of ${client}. The Service Provider retains the right to display work in their portfolio.
+
+8. CONFIDENTIALITY
+
+Both parties agree to keep project details confidential during and after the engagement.
+
+──────────────────────────────────────
+
+SIGNATURES
+
+Client: _____________________ Date: _______
+${client}
+
+Service Provider: ____________ Date: _______
+${senderName}`;
+  }
+
+  return `${typeLabel(type).toUpperCase()} — ${client}\n${today}\nPrepared by ${senderName}\n\n${project}\n\n${notes || ''}`;
+}
+
+// ========== VIEWER ==========
+function openViewer(doc, generating = false) {
+  document.getElementById('viewer-title').textContent = doc.title;
+  const editor = document.getElementById('doc-editor');
+
+  if (generating) {
+    document.getElementById('generating-state').style.display = 'flex';
+    editor.style.display = 'none';
+    editor.value = '';
+  } else {
+    document.getElementById('generating-state').style.display = 'none';
+    editor.style.display = 'block';
+    editor.value = doc.content;
+  }
+
+  document.getElementById('doc-viewer').classList.add('open');
+  currentDoc = doc;
+}
+
+function openDoc(id) {
+  const doc = docs.find(d => d.id === id);
+  if (doc) openViewer(doc, false);
+}
+
+function closeViewer() {
+  // Save any edits
+  if (currentDoc) {
+    currentDoc.content = document.getElementById('doc-editor').value;
+    const idx = docs.findIndex(d => d.id === currentDoc.id);
+    if (idx >= 0) { docs[idx] = currentDoc; localStorage.setItem('draftbox_docs', JSON.stringify(docs)); }
+  }
+  document.getElementById('doc-viewer').classList.remove('open');
+}
+
+async function regenerateDoc() {
+  if (!currentDoc) return;
+  const editor = document.getElementById('doc-editor');
+  document.getElementById('generating-state').style.display = 'flex';
+  editor.style.display = 'none';
+
+  try {
+    const token = localStorage.getItem('draftbox_token');
+    const response = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token || 'demo'}` },
+      body: JSON.stringify({
+        type: currentDoc.type, client: currentDoc.client,
+        project: currentDoc.project, budget: currentDoc.budget,
+        notes: currentDoc.notes, sender: currentDoc.sender
+      })
+    });
+    const result = await response.json();
+    currentDoc.content = result.content;
+  } catch {
+    currentDoc.content = generateFallbackDoc(currentDoc.type, currentDoc.client, currentDoc.project, currentDoc.budget, currentDoc.notes, currentDoc.sender);
+  }
+
+  const idx = docs.findIndex(d => d.id === currentDoc.id);
+  if (idx >= 0) { docs[idx] = currentDoc; localStorage.setItem('draftbox_docs', JSON.stringify(docs)); }
+
+  document.getElementById('generating-state').style.display = 'none';
+  editor.style.display = 'block';
+  await typeWriter(editor, currentDoc.content);
+}
+
+function copyDoc() {
+  const text = document.getElementById('doc-editor').value;
+  navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard ✓'));
+}
+
+function copyDocById(id) {
+  const doc = docs.find(d => d.id === id);
+  if (doc) navigator.clipboard.writeText(doc.content).then(() => showToast('Copied to clipboard ✓'));
+}
+
+function downloadDoc() {
+  if (!currentDoc) return;
+  const blob = new Blob([document.getElementById('doc-editor').value], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = currentDoc.title.replace(/[^a-z0-9]/gi, '_') + '.txt';
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function deleteDoc(id) {
+  if (!confirm('Delete this document?')) return;
+  docs = docs.filter(d => d.id !== id);
+  localStorage.setItem('draftbox_docs', JSON.stringify(docs));
+  renderDocs(currentFilter); updateStats(); updateUsage();
+  showToast('Document deleted');
+}
+
+// ========== UI HELPERS ==========
+function showVoice() { showToast('Voice training available in Pro plan'); }
+function showUpgrade() {
+  showToast('Upgrade at draftbox.app/upgrade — $9/month for Solo');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function typeLabel(type) {
+  return { proposal:'Proposal', sow:'SOW', email:'Email', brief:'Brief', followup:'Follow-up', cold:'Cold Outreach' }[type] || type;
+}
+
+function formatDate(ts) {
+  return new Date(ts).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+
+function escHtml(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Close modal on overlay click
+document.getElementById('new-doc-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeNewDoc();
+});
+
+// Init
+init();
+</script>
+</body>
+</html>

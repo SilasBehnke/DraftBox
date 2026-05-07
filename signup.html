@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DraftBox — Sign up</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0d; --paper: #f5f2ec; --cream: #ede9e0;
+    --rust: #c2531a; --muted: #7a756e; --border: #d8d3ca;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: 'DM Sans', sans-serif; font-weight: 300;
+    min-height: 100vh; display: flex;
+  }
+  .auth-left {
+    width: 42%; background: var(--ink); padding: 3rem;
+    display: flex; flex-direction: column; justify-content: space-between;
+    position: relative; overflow: hidden;
+  }
+  .auth-left-deco {
+    position: absolute; bottom: -4rem; right: -3rem;
+    font-family: 'Instrument Serif', serif; font-size: 18rem;
+    color: rgba(245,242,236,0.04); line-height: 1; user-select: none;
+    letter-spacing: -0.05em;
+  }
+  .auth-logo { font-family: 'Instrument Serif', serif; font-size: 1.4rem; color: var(--paper); text-decoration: none; }
+  .auth-logo span { color: #e8956b; }
+  .auth-left-tagline {
+    font-family: 'Instrument Serif', serif; font-size: 2.4rem;
+    color: var(--paper); line-height: 1.15; letter-spacing: -0.025em;
+  }
+  .auth-left-tagline em { font-style: italic; color: #e8956b; }
+  .auth-left-sub { font-size: 0.85rem; color: rgba(245,242,236,0.45); margin-top: 0.75rem; line-height: 1.6; }
+  .auth-right {
+    flex: 1; padding: 3rem; display: flex; align-items: center; justify-content: center;
+  }
+  .auth-form-wrap { width: 100%; max-width: 380px; }
+  .auth-title { font-family: 'Instrument Serif', serif; font-size: 2rem; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+  .auth-sub { font-size: 0.88rem; color: var(--muted); margin-bottom: 2.5rem; }
+  .auth-sub a { color: var(--rust); text-decoration: none; }
+  label { display: block; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; margin-top: 1.25rem; }
+  input[type=text], input[type=email], input[type=password] {
+    width: 100%; padding: 0.75rem 0.875rem;
+    background: white; border: 1px solid var(--border); border-radius: 2px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--ink);
+    transition: border-color 0.2s; outline: none;
+  }
+  input:focus { border-color: var(--rust); }
+  .btn-full {
+    width: 100%; background: var(--rust); color: white; border: none;
+    padding: 0.875rem; border-radius: 2px; font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem; font-weight: 500; letter-spacing: 0.05em;
+    text-transform: uppercase; cursor: pointer; margin-top: 1.75rem;
+    transition: background 0.2s;
+  }
+  .btn-full:hover { background: #9e4113; }
+  .divider { display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0; color: var(--muted); font-size: 0.78rem; }
+  .divider::before, .divider::after { content:''; flex:1; height:1px; background: var(--border); }
+  .terms { font-size: 0.75rem; color: var(--muted); margin-top: 1.25rem; text-align: center; line-height: 1.5; }
+  .terms a { color: var(--rust); text-decoration: none; }
+  @media (max-width: 700px) { .auth-left { display: none; } }
+</style>
+</head>
+<body>
+<div class="auth-left">
+  <a href="/" class="auth-logo">Draft<span>Box</span></a>
+  <div>
+    <p class="auth-left-tagline">Your words,<br><em>amplified</em></p>
+    <p class="auth-left-sub">Join 200+ freelancers closing more deals with better proposals — written in seconds.</p>
+  </div>
+  <div class="auth-left-deco">D</div>
+</div>
+<div class="auth-right">
+  <div class="auth-form-wrap">
+    <h1 class="auth-title">Create your account</h1>
+    <p class="auth-sub">Already have one? <a href="/app/login">Sign in</a></p>
+
+    <form id="signup-form" onsubmit="handleSignup(event)">
+      <label for="name">Full name</label>
+      <input type="text" id="name" placeholder="Alex Smith" required>
+
+      <label for="email">Email address</label>
+      <input type="email" id="email" placeholder="alex@studio.co" required>
+
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Min. 8 characters" required minlength="8">
+
+      <label for="profession">What kind of work do you do?</label>
+      <input type="text" id="profession" placeholder="e.g. Brand designer, developer, consultant">
+
+      <button type="submit" class="btn-full" id="signup-btn">Create account →</button>
+    </form>
+
+    <p class="terms">By signing up you agree to our <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a></p>
+  </div>
+</div>
+<script>
+async function handleSignup(e) {
+  e.preventDefault();
+  const btn = document.getElementById('signup-btn');
+  btn.textContent = 'Creating account...';
+  btn.disabled = true;
+
+  const data = {
+    name: document.getElementById('name').value,
+    email: document.getElementById('email').value,
+    password: document.getElementById('password').value,
+    profession: document.getElementById('profession').value
+  };
+
+  try {
+    const res = await fetch('/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    if (result.success) {
+      localStorage.setItem('draftbox_token', result.token);
+      localStorage.setItem('draftbox_user', JSON.stringify(result.user));
+      window.location.href = '/app/dashboard';
+    } else {
+      btn.textContent = 'Create account →';
+      btn.disabled = false;
+      alert(result.error || 'Something went wrong. Please try again.');
+    }
+  } catch {
+    btn.textContent = 'Create account →';
+    btn.disabled = false;
+    alert('Network error. Please try again.');
+  }
+}
+</script>
+</body>
+</html>
