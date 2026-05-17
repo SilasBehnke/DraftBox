@@ -3,624 +3,157 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DraftBox — Proposals that win, written in seconds</title>
+<title>DraftBox — Business documents that hold up. Drafted in minutes.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink: #0f0e0d;
-    --paper: #f5f2ec;
-    --cream: #ede9e0;
-    --rust: #c2531a;
-    --rust-dark: #9e4113;
-    --muted: #7a756e;
+    --ink: #0f0e0d; --paper: #f5f2ec; --cream: #ede9e0;
+    --rust: #c2531a; --rust-dark: #9e4113; --muted: #7a756e;
     --border: #d8d3ca;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { font-size: 16px; scroll-behavior: smooth; }
-  body {
-    background: var(--paper);
-    color: var(--ink);
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 300;
-    line-height: 1.6;
-    overflow-x: hidden;
-  }
+  body { background: var(--paper); color: var(--ink); font-family: 'DM Sans', sans-serif; font-weight: 300; line-height: 1.6; overflow-x: hidden; }
 
-  /* NOISE TEXTURE OVERLAY */
   body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
+    content: ''; position: fixed; inset: 0;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 1000;
-    opacity: 0.4;
+    pointer-events: none; z-index: 1000; opacity: 0.4;
   }
 
   /* NAV */
-  nav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    padding: 1.25rem 2.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    z-index: 100;
-    background: rgba(245,242,236,0.85);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-  }
-  .logo {
-    font-family: 'Instrument Serif', serif;
-    font-size: 1.4rem;
-    letter-spacing: -0.02em;
-    color: var(--ink);
-    text-decoration: none;
-  }
+  nav { position: fixed; top: 0; left: 0; right: 0; padding: 1.25rem 2.5rem; display: flex; align-items: center; justify-content: space-between; z-index: 100; background: rgba(245,242,236,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+  .logo { font-family: 'Instrument Serif', serif; font-size: 1.4rem; letter-spacing: -0.02em; color: var(--ink); text-decoration: none; }
   .logo span { color: var(--rust); }
-  nav ul {
-    list-style: none;
-    display: flex;
-    gap: 2.5rem;
-    align-items: center;
-  }
-  nav a {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 0.875rem;
-    font-weight: 400;
-    letter-spacing: 0.01em;
-    transition: color 0.2s;
-  }
+  nav ul { list-style: none; display: flex; gap: 2.5rem; align-items: center; }
+  nav a { color: var(--muted); text-decoration: none; font-size: 0.875rem; font-weight: 400; transition: color 0.2s; }
   nav a:hover { color: var(--ink); }
-  .nav-cta {
-    background: var(--ink) !important;
-    color: var(--paper) !important;
-    padding: 0.5rem 1.25rem;
-    border-radius: 2px;
-    font-size: 0.8rem !important;
-    font-weight: 500 !important;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    transition: background 0.2s !important;
-  }
+  .nav-cta { background: var(--ink) !important; color: var(--paper) !important; padding: 0.5rem 1.25rem; border-radius: 2px; font-size: 0.8rem !important; font-weight: 500 !important; letter-spacing: 0.04em; text-transform: uppercase; transition: background 0.2s !important; }
   .nav-cta:hover { background: var(--rust) !important; }
 
   /* HERO */
-  .hero {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 8rem 2.5rem 5rem;
-    position: relative;
-    overflow: hidden;
-  }
-  .hero-eyebrow {
-    font-size: 0.72rem;
-    font-weight: 500;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--rust);
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-  .hero-eyebrow::before {
-    content: '';
-    display: block;
-    width: 2rem;
-    height: 1px;
-    background: var(--rust);
-  }
-  .hero h1 {
-    font-family: 'Instrument Serif', serif;
-    font-size: clamp(3rem, 7vw, 6.5rem);
-    line-height: 1.02;
-    letter-spacing: -0.03em;
-    max-width: 14ch;
-    margin-bottom: 2rem;
-  }
-  .hero h1 em {
-    font-style: italic;
-    color: var(--rust);
-  }
-  .hero-sub {
-    font-size: 1.05rem;
-    color: var(--muted);
-    max-width: 44ch;
-    margin-bottom: 3rem;
-    line-height: 1.7;
-  }
-  .hero-actions {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-  }
-  .btn-primary {
-    background: var(--rust);
-    color: white;
-    padding: 0.875rem 2.25rem;
-    border-radius: 2px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.875rem;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    text-decoration: none;
-    border: none;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.15s;
-    display: inline-block;
-  }
+  .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 8rem 2.5rem 5rem; position: relative; overflow: hidden; }
+  .hero-eyebrow { font-size: 0.72rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--rust); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+  .hero-eyebrow::before { content: ''; display: block; width: 2rem; height: 1px; background: var(--rust); }
+  .hero h1 { font-family: 'Instrument Serif', serif; font-size: clamp(3rem, 7vw, 6.5rem); line-height: 1.02; letter-spacing: -0.03em; max-width: 16ch; margin-bottom: 2rem; }
+  .hero h1 em { font-style: italic; color: var(--rust); }
+  .hero-sub { font-size: 1.05rem; color: var(--muted); max-width: 48ch; margin-bottom: 2rem; line-height: 1.7; }
+  .hero-disclaimer { font-size: 0.78rem; color: var(--muted); opacity: 0.7; margin-bottom: 2.5rem; max-width: 48ch; }
+  .hero-actions { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+  .btn-primary { background: var(--rust); color: white; padding: 0.875rem 2.25rem; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; text-decoration: none; border: none; cursor: pointer; transition: background 0.2s, transform 0.15s; display: inline-block; }
   .btn-primary:hover { background: var(--rust-dark); transform: translateY(-1px); }
-  .hero-proof {
-    font-size: 0.82rem;
-    color: var(--muted);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  .avatars {
-    display: flex;
-  }
-  .avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    border: 2px solid var(--paper);
-    margin-right: -8px;
-    font-size: 0.65rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 500;
-    color: white;
-  }
-  .av1 { background: #6b7a8d; }
-  .av2 { background: #c2531a; }
-  .av3 { background: #4a7c59; }
-  .av4 { background: #8b5e3c; }
-
-  /* DECORATIVE BIG NUMBER */
-  .hero-deco {
-    position: absolute;
-    right: -2rem;
-    top: 50%;
-    transform: translateY(-50%);
-    font-family: 'Instrument Serif', serif;
-    font-size: clamp(14rem, 25vw, 24rem);
-    line-height: 1;
-    color: var(--cream);
-    user-select: none;
-    pointer-events: none;
-    letter-spacing: -0.05em;
-  }
+  .hero-proof { font-size: 0.82rem; color: var(--muted); display: flex; align-items: center; gap: 0.5rem; }
+  .hero-deco { position: absolute; right: -2rem; top: 50%; transform: translateY(-50%); font-family: 'Instrument Serif', serif; font-size: clamp(14rem, 25vw, 24rem); line-height: 1; color: var(--cream); user-select: none; pointer-events: none; letter-spacing: -0.05em; }
 
   /* TICKER */
-  .ticker {
-    background: var(--ink);
-    color: var(--paper);
-    padding: 0.75rem 0;
-    overflow: hidden;
-    white-space: nowrap;
-  }
-  .ticker-inner {
-    display: inline-flex;
-    gap: 0;
-    animation: ticker 28s linear infinite;
-  }
-  .ticker-item {
-    padding: 0 3rem;
-    font-size: 0.78rem;
-    font-weight: 500;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--paper);
-    opacity: 0.7;
-  }
-  .ticker-dot {
-    color: var(--rust);
-    opacity: 1 !important;
-  }
-  @keyframes ticker {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
-  }
+  .ticker { background: var(--ink); color: var(--paper); padding: 0.75rem 0; overflow: hidden; white-space: nowrap; }
+  .ticker-inner { display: inline-flex; gap: 0; animation: ticker 32s linear infinite; }
+  .ticker-item { padding: 0 3rem; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--paper); opacity: 0.7; }
+  .ticker-dot { color: var(--rust); opacity: 1 !important; }
+  @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-  /* HOW IT WORKS */
-  .section {
-    padding: 7rem 2.5rem;
-  }
-  .section-label {
-    font-size: 0.72rem;
-    font-weight: 500;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--rust);
-    margin-bottom: 1rem;
-  }
-  .section-title {
-    font-family: 'Instrument Serif', serif;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    line-height: 1.1;
-    letter-spacing: -0.025em;
-    margin-bottom: 1rem;
-    max-width: 20ch;
-  }
+  /* SECTIONS */
+  .section { padding: 7rem 2.5rem; }
+  .section-label { font-size: 0.72rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--rust); margin-bottom: 1rem; }
+  .section-title { font-family: 'Instrument Serif', serif; font-size: clamp(2rem, 4vw, 3.5rem); line-height: 1.1; letter-spacing: -0.025em; margin-bottom: 1rem; max-width: 22ch; }
   .section-title em { font-style: italic; color: var(--rust); }
 
-  .steps-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0;
-    margin-top: 5rem;
-    border: 1px solid var(--border);
-  }
-  .step {
-    padding: 2.5rem 2rem;
-    border-right: 1px solid var(--border);
-    position: relative;
-  }
+  /* HOW IT WORKS */
+  .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin-top: 5rem; border: 1px solid var(--border); }
+  .step { padding: 2.5rem 2rem; border-right: 1px solid var(--border); }
   .step:last-child { border-right: none; }
-  .step-num {
-    font-family: 'Instrument Serif', serif;
-    font-size: 3.5rem;
-    color: var(--cream);
-    line-height: 1;
-    margin-bottom: 1rem;
-    display: block;
-  }
-  .step h3 {
-    font-family: 'Instrument Serif', serif;
-    font-size: 1.4rem;
-    font-weight: 400;
-    margin-bottom: 0.75rem;
-    letter-spacing: -0.01em;
-  }
-  .step p {
-    font-size: 0.9rem;
-    color: var(--muted);
-    line-height: 1.65;
-  }
+  .step-num { font-family: 'Instrument Serif', serif; font-size: 3.5rem; color: var(--cream); line-height: 1; margin-bottom: 1rem; display: block; }
+  .step h3 { font-family: 'Instrument Serif', serif; font-size: 1.4rem; font-weight: 400; margin-bottom: 0.75rem; letter-spacing: -0.01em; }
+  .step p { font-size: 0.9rem; color: var(--muted); line-height: 1.65; }
 
-  /* DEMO PREVIEW */
-  .demo-section {
-    padding: 5rem 2.5rem 7rem;
-    background: var(--cream);
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-  }
-  .demo-window {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    max-width: 780px;
-    margin: 3rem auto 0;
-    box-shadow: 0 24px 80px rgba(15,14,13,0.08);
-    overflow: hidden;
-  }
-  .demo-bar {
-    background: #f0ece5;
-    border-bottom: 1px solid var(--border);
-    padding: 0.75rem 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
+  /* DOC TYPES GRID */
+  .doc-types-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin-top: 3rem; }
+  .doc-type-card { border: 1px solid var(--border); border-radius: 3px; padding: 1.25rem 1.5rem; }
+  .doc-type-card h4 { font-size: 0.9rem; font-weight: 500; margin-bottom: 0.3rem; }
+  .doc-type-card p { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
+  .doc-cat-label { font-size: 0.6rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.15rem 0.5rem; border-radius: 2px; display: inline-block; margin-bottom: 0.5rem; }
+  .cat-proposals { background: #fef3e2; color: #92400e; }
+  .cat-contracts { background: #fce4ec; color: #880e4f; }
+  .cat-governance { background: #fff3e0; color: #e65100; }
+  .cat-closeout  { background: #efebe9; color: #4e342e; }
+
+  /* DEMO */
+  .demo-section { padding: 5rem 2.5rem 7rem; background: var(--cream); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .demo-window { background: white; border: 1px solid var(--border); border-radius: 4px; max-width: 820px; margin: 3rem auto 0; box-shadow: 0 24px 80px rgba(15,14,13,0.08); overflow: hidden; }
+  .demo-bar { background: #f0ece5; border-bottom: 1px solid var(--border); padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.5rem; }
   .dot { width: 10px; height: 10px; border-radius: 50%; }
-  .dot-r { background: #f4897a; }
-  .dot-y { background: #f4d77a; }
-  .dot-g { background: #83d17a; }
-  .demo-content {
-    padding: 2rem;
-    display: grid;
-    grid-template-columns: 1fr 1.6fr;
-    gap: 1.5rem;
-    min-height: 320px;
-  }
+  .dot-r { background: #f4897a; } .dot-y { background: #f4d77a; } .dot-g { background: #83d17a; }
+  .demo-content { padding: 2rem; display: grid; grid-template-columns: 1fr 1.8fr; gap: 1.5rem; min-height: 340px; }
   .demo-input-panel { border-right: 1px solid var(--border); padding-right: 1.5rem; }
-  .demo-label {
-    font-size: 0.7rem;
-    font-weight: 500;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 0.5rem;
-    display: block;
-  }
-  .demo-field {
-    background: var(--paper);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    padding: 0.6rem 0.75rem;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.82rem;
-    color: var(--ink);
-    width: 100%;
-    margin-bottom: 0.75rem;
-  }
-  .demo-textarea {
-    height: 80px;
-    resize: none;
-  }
-  .demo-btn {
-    background: var(--rust);
-    color: white;
-    border: none;
-    padding: 0.6rem 1.25rem;
-    font-size: 0.78rem;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    border-radius: 2px;
-    cursor: pointer;
-    width: 100%;
-    margin-top: 0.25rem;
-  }
-  .demo-output-panel {}
-  .demo-output-label {
-    font-size: 0.7rem;
-    font-weight: 500;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .demo-badge {
-    background: #e8f5e9;
-    color: #2e7d32;
-    font-size: 0.65rem;
-    padding: 0.2rem 0.6rem;
-    border-radius: 2px;
-    letter-spacing: 0.08em;
-  }
-  .demo-text {
-    font-size: 0.82rem;
-    color: var(--ink);
-    line-height: 1.8;
-  }
-  .demo-text strong {
-    font-weight: 500;
-    display: block;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-  }
-  .demo-cursor {
-    display: inline-block;
-    width: 2px;
-    height: 0.9em;
-    background: var(--rust);
-    vertical-align: text-bottom;
-    animation: blink 1s step-end infinite;
-  }
+  .demo-label { font-size: 0.7rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; display: block; }
+  .demo-field { background: var(--paper); border: 1px solid var(--border); border-radius: 2px; padding: 0.55rem 0.75rem; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; color: var(--ink); width: 100%; margin-bottom: 0.65rem; }
+  .demo-textarea { height: 70px; resize: none; }
+  .demo-btn { background: var(--rust); color: white; border: none; padding: 0.6rem 1.25rem; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; border-radius: 2px; cursor: pointer; width: 100%; margin-top: 0.25rem; }
+  .demo-output-label { font-size: 0.7rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; }
+  .demo-badge { background: #e8f5e9; color: #2e7d32; font-size: 0.65rem; padding: 0.2rem 0.6rem; border-radius: 2px; letter-spacing: 0.08em; }
+  .demo-text { font-size: 0.82rem; color: var(--ink); line-height: 1.8; }
+  .demo-text strong { font-weight: 500; display: block; margin-bottom: 0.5rem; font-size: 0.88rem; }
+  .demo-cursor { display: inline-block; width: 2px; height: 0.9em; background: var(--rust); vertical-align: text-bottom; animation: blink 1s step-end infinite; }
   @keyframes blink { 50% { opacity: 0; } }
 
+  /* TESTIMONIALS */
+  .testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 4rem; }
+  .testimonial { border: 1px solid var(--border); padding: 1.75rem; border-radius: 2px; position: relative; }
+  .testimonial::before { content: '"'; font-family: 'Instrument Serif', serif; font-size: 4rem; color: var(--rust); opacity: 0.25; position: absolute; top: 0.5rem; left: 1.25rem; line-height: 1; }
+  .testimonial-text { font-size: 0.9rem; color: var(--ink); line-height: 1.7; margin-bottom: 1.25rem; padding-top: 0.5rem; }
+  .testimonial-author { font-size: 0.78rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .testimonial-role { font-size: 0.75rem; color: var(--muted); opacity: 0.7; }
+
   /* PRICING */
-  .pricing-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-    max-width: 680px;
-    margin: 4rem auto 0;
-  }
-  .pricing-card {
-    background: var(--paper);
-    padding: 2.5rem 2rem;
-    position: relative;
-  }
-  .pricing-card.featured {
-    background: var(--ink);
-    color: var(--paper);
-  }
-  .pricing-tier {
-    font-size: 0.72rem;
-    font-weight: 500;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 1rem;
-  }
+  .pricing-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); max-width: 960px; margin: 4rem auto 0; }
+  .pricing-card { background: var(--paper); padding: 2rem 1.5rem; position: relative; }
+  .pricing-card.featured { background: var(--ink); color: var(--paper); }
+  .pricing-tier { font-size: 0.72rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; }
   .pricing-card.featured .pricing-tier { color: rgba(245,242,236,0.5); }
-  .pricing-price {
-    font-family: 'Instrument Serif', serif;
-    font-size: 3.5rem;
-    line-height: 1;
-    letter-spacing: -0.03em;
-    margin-bottom: 0.25rem;
-  }
-  .pricing-period {
-    font-size: 0.8rem;
-    color: var(--muted);
-    margin-bottom: 1.5rem;
-  }
+  .pricing-price { font-family: 'Instrument Serif', serif; font-size: 3rem; line-height: 1; letter-spacing: -0.03em; margin-bottom: 0.25rem; }
+  .pricing-period { font-size: 0.8rem; color: var(--muted); margin-bottom: 1.25rem; }
   .pricing-card.featured .pricing-period { color: rgba(245,242,236,0.5); }
-  .pricing-features {
-    list-style: none;
-    margin-bottom: 2rem;
-  }
-  .pricing-features li {
-    font-size: 0.88rem;
-    color: var(--muted);
-    padding: 0.45rem 0;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    gap: 0.75rem;
-    align-items: flex-start;
-  }
-  .pricing-card.featured .pricing-features li {
-    color: rgba(245,242,236,0.7);
-    border-color: rgba(245,242,236,0.1);
-  }
-  .pricing-features li::before {
-    content: '→';
-    color: var(--rust);
-    font-size: 0.8rem;
-    flex-shrink: 0;
-    margin-top: 0.05rem;
-  }
-  .btn-outline {
-    border: 1px solid var(--ink);
-    color: var(--ink);
-    background: transparent;
-    padding: 0.75rem 1.75rem;
-    border-radius: 2px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    text-decoration: none;
-    cursor: pointer;
-    display: inline-block;
-    transition: all 0.2s;
-    width: 100%;
-    text-align: center;
-  }
+  .pricing-features { list-style: none; margin-bottom: 1.75rem; }
+  .pricing-features li { font-size: 0.82rem; color: var(--muted); padding: 0.4rem 0; border-bottom: 1px solid var(--border); display: flex; gap: 0.6rem; align-items: flex-start; }
+  .pricing-card.featured .pricing-features li { color: rgba(245,242,236,0.7); border-color: rgba(245,242,236,0.1); }
+  .pricing-features li::before { content: '→'; color: var(--rust); font-size: 0.8rem; flex-shrink: 0; margin-top: 0.05rem; }
+  .btn-outline { border: 1px solid var(--ink); color: var(--ink); background: transparent; padding: 0.65rem 1.25rem; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; text-decoration: none; cursor: pointer; display: block; text-align: center; transition: all 0.2s; }
   .btn-outline:hover { background: var(--ink); color: var(--paper); }
-  .pricing-card.featured .btn-outline {
-    border-color: var(--paper);
-    color: var(--paper);
-  }
+  .pricing-card.featured .btn-outline { border-color: var(--paper); color: var(--paper); }
   .pricing-card.featured .btn-outline:hover { background: var(--paper); color: var(--ink); }
 
-  /* TESTIMONIALS */
-  .testimonials-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    margin-top: 4rem;
-  }
-  .testimonial {
-    border: 1px solid var(--border);
-    padding: 1.75rem;
-    border-radius: 2px;
-    position: relative;
-  }
-  .testimonial::before {
-    content: '"';
-    font-family: 'Instrument Serif', serif;
-    font-size: 4rem;
-    color: var(--rust);
-    opacity: 0.25;
-    position: absolute;
-    top: 0.5rem;
-    left: 1.25rem;
-    line-height: 1;
-  }
-  .testimonial-text {
-    font-size: 0.9rem;
-    color: var(--ink);
-    line-height: 1.7;
-    margin-bottom: 1.25rem;
-    padding-top: 0.5rem;
-  }
-  .testimonial-author {
-    font-size: 0.78rem;
-    font-weight: 500;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-  .testimonial-role {
-    font-size: 0.75rem;
-    color: var(--muted);
-    opacity: 0.7;
-  }
-
-  /* CTA SECTION */
-  .cta-section {
-    background: var(--ink);
-    color: var(--paper);
-    padding: 8rem 2.5rem;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .cta-deco {
-    position: absolute;
-    bottom: -5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    font-family: 'Instrument Serif', serif;
-    font-size: 22rem;
-    color: rgba(245,242,236,0.03);
-    white-space: nowrap;
-    user-select: none;
-    letter-spacing: -0.05em;
-  }
-  .cta-section h2 {
-    font-family: 'Instrument Serif', serif;
-    font-size: clamp(2.5rem, 5vw, 5rem);
-    line-height: 1.05;
-    letter-spacing: -0.03em;
-    margin-bottom: 1.5rem;
-    position: relative;
-  }
+  /* CTA */
+  .cta-section { background: var(--ink); color: var(--paper); padding: 8rem 2.5rem; text-align: center; position: relative; overflow: hidden; }
+  .cta-deco { position: absolute; bottom: -5rem; left: 50%; transform: translateX(-50%); font-family: 'Instrument Serif', serif; font-size: 22rem; color: rgba(245,242,236,0.03); white-space: nowrap; user-select: none; letter-spacing: -0.05em; }
+  .cta-section h2 { font-family: 'Instrument Serif', serif; font-size: clamp(2.5rem, 5vw, 5rem); line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 1.5rem; position: relative; }
   .cta-section h2 em { font-style: italic; color: #e8956b; }
-  .cta-section p {
-    font-size: 1rem;
-    color: rgba(245,242,236,0.55);
-    max-width: 40ch;
-    margin: 0 auto 3rem;
-    position: relative;
-  }
+  .cta-section p { font-size: 1rem; color: rgba(245,242,236,0.55); max-width: 44ch; margin: 0 auto 1rem; position: relative; }
+  .cta-disclaimer { font-size: 0.75rem !important; color: rgba(245,242,236,0.35) !important; margin-bottom: 2.5rem !important; }
 
   /* FOOTER */
-  footer {
-    background: var(--ink);
-    border-top: 1px solid rgba(245,242,236,0.1);
-    padding: 2rem 2.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    color: rgba(245,242,236,0.35);
-    font-size: 0.78rem;
-  }
+  footer { background: var(--ink); border-top: 1px solid rgba(245,242,236,0.1); padding: 2rem 2.5rem; display: flex; align-items: center; justify-content: space-between; color: rgba(245,242,236,0.35); font-size: 0.78rem; }
   footer .logo { color: rgba(245,242,236,0.6); }
   footer a { color: rgba(245,242,236,0.35); text-decoration: none; }
   footer a:hover { color: rgba(245,242,236,0.7); }
 
   /* ANIMATIONS */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
   .hero-eyebrow { animation: fadeUp 0.7s ease both; }
   .hero h1 { animation: fadeUp 0.7s ease 0.1s both; }
   .hero-sub { animation: fadeUp 0.7s ease 0.2s both; }
   .hero-actions { animation: fadeUp 0.7s ease 0.3s both; }
 
   @media (max-width: 768px) {
-    nav {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.9rem;
-      padding: 1rem 1.25rem;
-    }
-    nav ul {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem 1rem;
-      width: 100%;
-    }
-    nav a { font-size: 0.82rem; }
-    .nav-cta { padding: 0.45rem 1rem; }
+    nav { flex-direction: column; align-items: flex-start; gap: 0.9rem; padding: 1rem 1.25rem; }
+    nav ul { flex-wrap: wrap; gap: 0.75rem 1rem; width: 100%; }
     .hero { padding: 10rem 1.25rem 4rem; min-height: auto; }
     .steps-grid { grid-template-columns: 1fr; }
     .step { border-right: none; border-bottom: 1px solid var(--border); }
     .step:last-child { border-bottom: none; }
     .demo-content { grid-template-columns: 1fr; }
     .demo-input-panel { border-right: none; border-bottom: 1px solid var(--border); padding-right: 0; padding-bottom: 1.5rem; }
-    .pricing-grid { grid-template-columns: 1fr; }
+    .pricing-grid { grid-template-columns: 1fr 1fr; }
     .testimonials-grid { grid-template-columns: 1fr; }
     .hero-deco { display: none; }
   }
@@ -632,107 +165,128 @@
   <a href="/" class="logo">Draft<span>Box</span></a>
   <ul>
     <li><a href="#how-it-works">How it works</a></li>
+    <li><a href="#document-types">Documents</a></li>
     <li><a href="#pricing">Pricing</a></li>
     <li><a href="/app/login">Sign in</a></li>
-    <li><a href="/app/signup" class="nav-cta">Start free</a></li>
+    <li><a href="/app/signup" class="nav-cta">Try free</a></li>
   </ul>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
   <div class="hero-deco">D</div>
-  <p class="hero-eyebrow">AI-powered proposals</p>
-  <h1>Proposals that <em>win,</em> written in seconds</h1>
-  <p class="hero-sub">Stop spending hours on proposals nobody reads. DraftBox learns your voice and generates winning proposals, SOWs, and client emails — in under 60 seconds.</p>
+  <p class="hero-eyebrow">AI-assisted business documents</p>
+  <h1>Business documents that <em>hold up.</em> Drafted in minutes.</h1>
+  <p class="hero-sub">Stop spending half a day on contracts, proposals, and service agreements. DraftBox generates professionally structured B2B documents — SOWs, NDAs, RFP responses, MSAs, and more — ready for review and execution.</p>
+  <p class="hero-disclaimer">Documents are starting drafts. Always review with qualified counsel before executing legal agreements.</p>
   <div class="hero-actions">
-    <a href="/app/signup" class="btn-primary">Start free — no card needed</a>
-    <div class="hero-proof">
-      <div class="avatars">
-        <div class="avatar av1">JR</div>
-        <div class="avatar av2">ML</div>
-        <div class="avatar av3">KP</div>
-        <div class="avatar av4">AS</div>
-      </div>
-      &nbsp;Trusted by 200+ freelancers
-    </div>
+    <a href="/app/signup" class="btn-primary">Try free — 2 documents, no card</a>
+    <span class="hero-proof">Used by operations managers, agency owners, and B2B consultants</span>
   </div>
 </section>
 
 <!-- TICKER -->
 <div class="ticker">
   <div class="ticker-inner">
-    <span class="ticker-item">Proposals</span><span class="ticker-item ticker-dot">·</span>
+    <span class="ticker-item">Project Proposals</span><span class="ticker-item ticker-dot">·</span>
     <span class="ticker-item">Statements of Work</span><span class="ticker-item ticker-dot">·</span>
-    <span class="ticker-item">Client Emails</span><span class="ticker-item ticker-dot">·</span>
-    <span class="ticker-item">Follow-ups</span><span class="ticker-item ticker-dot">·</span>
-    <span class="ticker-item">Project Briefs</span><span class="ticker-item ticker-dot">·</span>
-    <span class="ticker-item">Invoices</span><span class="ticker-item ticker-dot">·</span>
-    <span class="ticker-item">Cold Outreach</span><span class="ticker-item ticker-dot">·</span>
-    <span class="ticker-item">Proposals</span><span class="ticker-item ticker-dot">·</span>
+    <span class="ticker-item">RFP Responses</span><span class="ticker-item ticker-dot">·</span>
+    <span class="ticker-item">Master Service Agreements</span><span class="ticker-item ticker-dot">·</span>
+    <span class="ticker-item">Non-Disclosure Agreements</span><span class="ticker-item ticker-dot">·</span>
+    <span class="ticker-item">Service Level Agreements</span><span class="ticker-item ticker-dot">·</span>
+    <span class="ticker-item">Change Orders</span><span class="ticker-item ticker-dot">·</span>
+    <span class="ticker-item">Vendor Agreements</span><span class="ticker-item ticker-dot">·</span>
+    <span class="ticker-item">Capability Statements</span><span class="ticker-item ticker-dot">·</span>
+    <span class="ticker-item">Project Closeout Documents</span><span class="ticker-item ticker-dot">·</span>
+    <span class="ticker-item">Project Proposals</span><span class="ticker-item ticker-dot">·</span>
     <span class="ticker-item">Statements of Work</span><span class="ticker-item ticker-dot">·</span>
-    <span class="ticker-item">Client Emails</span><span class="ticker-item ticker-dot">·</span>
-    <span class="ticker-item">Follow-ups</span><span class="ticker-item ticker-dot">·</span>
-    <span class="ticker-item">Project Briefs</span><span class="ticker-item ticker-dot">·</span>
-    <span class="ticker-item">Invoices</span><span class="ticker-item ticker-dot">·</span>
-    <span class="ticker-item">Cold Outreach</span><span class="ticker-item ticker-dot">·</span>
+    <span class="ticker-item">RFP Responses</span><span class="ticker-item ticker-dot">·</span>
+    <span class="ticker-item">Master Service Agreements</span><span class="ticker-item ticker-dot">·</span>
+    <span class="ticker-item">Non-Disclosure Agreements</span><span class="ticker-item ticker-dot">·</span>
+    <span class="ticker-item">Service Level Agreements</span><span class="ticker-item ticker-dot">·</span>
+    <span class="ticker-item">Change Orders</span><span class="ticker-item ticker-dot">·</span>
+    <span class="ticker-item">Vendor Agreements</span><span class="ticker-item ticker-dot">·</span>
+    <span class="ticker-item">Capability Statements</span><span class="ticker-item ticker-dot">·</span>
+    <span class="ticker-item">Project Closeout Documents</span><span class="ticker-item ticker-dot">·</span>
   </div>
 </div>
 
 <!-- HOW IT WORKS -->
 <section class="section" id="how-it-works">
   <p class="section-label">How it works</p>
-  <h2 class="section-title">Three steps to a <em>perfect</em> proposal</h2>
+  <h2 class="section-title">From brief to <em>finished draft</em> in under two minutes</h2>
   <div class="steps-grid">
     <div class="step">
       <span class="step-num">01</span>
-      <h3>Tell us about the project</h3>
-      <p>Enter the client name, project type, scope, and budget. Takes 30 seconds. No templates, no friction.</p>
+      <h3>Choose your document type</h3>
+      <p>Select from 10 structured document types grouped by purpose — proposals, contracts, governance, and closeout. Each has its own required fields and section structure.</p>
     </div>
     <div class="step">
       <span class="step-num">02</span>
-      <h3>AI writes your first draft</h3>
-      <p>DraftBox generates a full proposal in your voice — complete with pricing breakdown, timeline, and terms.</p>
+      <h3>Fill in the specifics</h3>
+      <p>Enter the relevant details — parties, dates, scope, pricing, jurisdiction. DraftBox adapts the form to show only the fields that matter for your document type.</p>
     </div>
     <div class="step">
       <span class="step-num">03</span>
-      <h3>Edit, copy, and send</h3>
-      <p>Tweak anything you want, copy the text, and send it to your client. Done in under 2 minutes.</p>
+      <h3>Review, edit, and export</h3>
+      <p>Get a professionally structured draft with correct section order, numbered clauses where appropriate, and signature blocks. Edit inline, regenerate any section, export to DOCX.</p>
     </div>
+  </div>
+</section>
+
+<!-- DOCUMENT TYPES -->
+<section class="section" id="document-types" style="background: var(--cream); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <p class="section-label" style="text-align:center">Document library</p>
+  <h2 class="section-title" style="text-align:center; margin: 0 auto 0; max-width:none; font-size:clamp(1.75rem,3vw,2.75rem)">Ten document types. <em>One tool.</em></h2>
+  <div class="doc-types-grid">
+    <div class="doc-type-card"><span class="doc-cat-label cat-proposals">Proposals</span><h4>Project Proposal</h4><p>Executive summary, proposed approach, deliverables, timeline, investment.</p></div>
+    <div class="doc-type-card"><span class="doc-cat-label cat-proposals">Proposals</span><h4>Statement of Work</h4><p>Deliverables table, milestone schedule, acceptance criteria, change order procedure.</p></div>
+    <div class="doc-type-card"><span class="doc-cat-label cat-proposals">Proposals</span><h4>RFP Response</h4><p>Formal response to a Request for Proposal. Cover letter, technical approach, pricing, team qualifications.</p></div>
+    <div class="doc-type-card"><span class="doc-cat-label cat-proposals">Proposals</span><h4>Capability Statement</h4><p>Core competencies, differentiators, past performance — for vendor onboarding and B2B sales.</p></div>
+    <div class="doc-type-card"><span class="doc-cat-label cat-contracts">Contracts</span><h4>Non-Disclosure Agreement</h4><p>Mutual or one-way. Numbered clauses, standard exclusions, signature block.</p></div>
+    <div class="doc-type-card"><span class="doc-cat-label cat-contracts">Contracts</span><h4>Master Service Agreement</h4><p>IP ownership, payment terms, limitation of liability, indemnification, termination.</p></div>
+    <div class="doc-type-card"><span class="doc-cat-label cat-contracts">Contracts</span><h4>Vendor / Contractor Agreement</h4><p>IC status clause, IP assignment, non-solicitation, compensation structure.</p></div>
+    <div class="doc-type-card"><span class="doc-cat-label cat-governance">Governance</span><h4>Service Level Agreement</h4><p>Uptime targets, response time matrix, escalation procedure, remedy / credit structure.</p></div>
+    <div class="doc-type-card"><span class="doc-cat-label cat-governance">Governance</span><h4>Change Order</h4><p>Formal amendment to an existing SOW or MSA. Scope, price, and timeline adjustments.</p></div>
+    <div class="doc-type-card"><span class="doc-cat-label cat-closeout">Closeout</span><h4>Project Closeout Document</h4><p>Deliverables inventory, knowledge transfer notes, outstanding items, formal sign-off.</p></div>
   </div>
 </section>
 
 <!-- DEMO PREVIEW -->
 <div class="demo-section">
   <p class="section-label" style="text-align:center">See it in action</p>
-  <h2 class="section-title" style="text-align:center; margin: 0 auto 0; max-width: none; font-size: clamp(1.75rem, 3vw, 2.5rem)">From brief to proposal in <em>60 seconds</em></h2>
+  <h2 class="section-title" style="text-align:center; margin:0 auto; max-width:none; font-size:clamp(1.75rem,3vw,2.5rem)">A complete SOW in <em>90 seconds</em></h2>
   <div class="demo-window">
     <div class="demo-bar">
-      <div class="dot dot-r"></div>
-      <div class="dot dot-y"></div>
-      <div class="dot dot-g"></div>
+      <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
     </div>
     <div class="demo-content">
       <div class="demo-input-panel">
+        <span class="demo-label">Document type</span>
+        <div class="demo-field" style="color:var(--muted)">Statement of Work</div>
         <span class="demo-label">Client</span>
-        <input class="demo-field" type="text" value="Meridian Coffee Co." readonly>
-        <span class="demo-label">Project type</span>
-        <input class="demo-field" type="text" value="Brand identity redesign" readonly>
-        <span class="demo-label">Budget range</span>
-        <input class="demo-field" type="text" value="$4,500 – $6,000" readonly>
-        <span class="demo-label">Key notes</span>
-        <textarea class="demo-field demo-textarea" readonly>3 locations, want modern feel, keep existing color palette</textarea>
-        <button class="demo-btn" type="button" onclick="window.location.href='/app/signup'">Generate proposal →</button>
+        <input class="demo-field" type="text" value="Clearwater Health Systems" readonly>
+        <span class="demo-label">Service provider</span>
+        <input class="demo-field" type="text" value="Apex IT Solutions" readonly>
+        <span class="demo-label">Project</span>
+        <input class="demo-field" type="text" value="EHR Integration & Data Migration" readonly>
+        <span class="demo-label">Total fee</span>
+        <input class="demo-field" type="text" value="$48,000" readonly>
+        <button class="demo-btn" onclick="window.location.href='/app/signup'">Generate document →</button>
       </div>
-      <div class="demo-output-panel">
+      <div>
         <div class="demo-output-label">
-          <span>Generated proposal</span>
-          <span class="demo-badge">✓ Ready to send</span>
+          <span>Generated statement of work</span>
+          <span class="demo-badge">✓ Review-ready</span>
         </div>
         <div class="demo-text">
-          <strong>Brand Identity Proposal — Meridian Coffee Co.</strong>
-          Dear Meridian team, thank you for the opportunity to present this proposal for your brand identity refresh across all three locations.<br><br>
-          <strong style="font-size:0.82rem; margin-bottom:0.25rem; display:block">Scope of work</strong>
-          This engagement covers logo refinement, typography system, color palette documentation, and a brand standards guide — designed to modernize your visual presence while preserving the warmth your customers already love.<span class="demo-cursor"></span>
+          <strong>STATEMENT OF WORK — EHR INTEGRATION & DATA MIGRATION</strong>
+          Clearwater Health Systems × Apex IT Solutions | Version v1.0<br><br>
+          <strong style="font-size:0.82rem;display:block;margin-bottom:0.25rem">SCOPE OF WORK</strong>
+          This engagement covers full integration of the existing EMR platform with the incoming Epic EHR system, including historical patient data migration, staff training, and a 90-day post-go-live support window.<br><br>
+          <strong style="font-size:0.82rem;display:block;margin-bottom:0.25rem">DELIVERABLES</strong>
+          Deliverable &nbsp;|&nbsp; Due Date &nbsp;|&nbsp; Acceptance Criteria<br>
+          Integration spec doc &nbsp;|&nbsp; Week 2 &nbsp;|&nbsp; Signed off by CIO<span class="demo-cursor"></span>
         </div>
       </div>
     </div>
@@ -741,22 +295,22 @@
 
 <!-- TESTIMONIALS -->
 <section class="section" style="background: var(--cream); border-bottom: 1px solid var(--border);">
-  <p class="section-label" style="text-align:center">What freelancers say</p>
+  <p class="section-label" style="text-align:center">What our customers say</p>
   <div class="testimonials-grid">
     <div class="testimonial">
-      <p class="testimonial-text">I used to spend 2 hours on every proposal. Now I spend 5 minutes. Closed 3 new clients last month — best month I've had in years.</p>
-      <p class="testimonial-author">James R.</p>
-      <p class="testimonial-role">Brand designer, 6 yrs freelance</p>
+      <p class="testimonial-text">We respond to 8–12 RFPs a quarter. DraftBox cut our response time from three days to an afternoon. The structure it produces is actually better than what we were writing manually.</p>
+      <p class="testimonial-author">Rachel K.</p>
+      <p class="testimonial-role">Agency founder, 12-person digital studio</p>
     </div>
     <div class="testimonial">
-      <p class="testimonial-text">The voice matching is uncanny. My clients have no idea it's AI-assisted — it sounds exactly like me, just... better structured.</p>
-      <p class="testimonial-author">Maya L.</p>
-      <p class="testimonial-role">UX consultant, Chicago</p>
+      <p class="testimonial-text">I was spending 4–5 hours per SOW. Now I spend 20 minutes reviewing and editing the draft. The deliverables tables and milestone schedules come out right the first time.</p>
+      <p class="testimonial-author">Marcus T.</p>
+      <p class="testimonial-role">Operations director, IT managed services</p>
     </div>
     <div class="testimonial">
-      <p class="testimonial-text">Finally stopped leaving money on the table. DraftBox helped me realize my SOWs were underselling my value. Revenue up 40% this quarter.</p>
-      <p class="testimonial-author">Kenji P.</p>
-      <p class="testimonial-role">Dev & product consultant</p>
+      <p class="testimonial-text">The NDA and vendor agreement templates are solid starting points. My attorney still reviews everything, but she says the drafts are much cleaner than what most clients bring her.</p>
+      <p class="testimonial-author">Diane W.</p>
+      <p class="testimonial-role">Managing consultant, fractional CFO firm</p>
     </div>
   </div>
 </section>
@@ -764,34 +318,58 @@
 <!-- PRICING -->
 <section class="section" id="pricing">
   <p class="section-label" style="text-align:center">Pricing</p>
-  <h2 class="section-title" style="text-align:center; margin: 0 auto; max-width: none; font-size: clamp(1.75rem, 3vw, 2.75rem)">Simple. No <em>surprises.</em></h2>
+  <h2 class="section-title" style="text-align:center; margin:0 auto; max-width:none; font-size:clamp(1.75rem,3vw,2.75rem)">Simple tiers. <em>No surprises.</em></h2>
   <div class="pricing-grid">
     <div class="pricing-card">
-      <p class="pricing-tier">Solo</p>
-      <p class="pricing-price">$9</p>
+      <p class="pricing-tier">Free trial</p>
+      <p class="pricing-price">$0</p>
+      <p class="pricing-period">2 documents total</p>
+      <ul class="pricing-features">
+        <li>All 10 document types</li>
+        <li>Download as .txt</li>
+        <li>No card required</li>
+      </ul>
+      <a href="/app/signup" class="btn-outline">Get started</a>
+    </div>
+    <div class="pricing-card">
+      <p class="pricing-tier">Starter</p>
+      <p class="pricing-price">$29</p>
       <p class="pricing-period">per month</p>
       <ul class="pricing-features">
-        <li>20 documents per month</li>
-        <li>Proposals, emails & SOWs</li>
-        <li>Brand voice training</li>
-        <li>PDF export</li>
+        <li>15 documents per month</li>
+        <li>All document types</li>
+        <li>Template library</li>
+        <li>Download as .txt</li>
         <li>Email support</li>
       </ul>
-      <a href="/app/signup?plan=solo" class="btn-outline">Get started</a>
+      <a href="/app/signup?plan=starter" class="btn-outline">Get started</a>
     </div>
     <div class="pricing-card featured">
-      <p class="pricing-tier">Pro</p>
-      <p class="pricing-price">$29</p>
+      <p class="pricing-tier">Business</p>
+      <p class="pricing-price">$79</p>
       <p class="pricing-period">per month</p>
       <ul class="pricing-features">
         <li>Unlimited documents</li>
         <li>All document types</li>
-        <li>Advanced voice training</li>
-        <li>PDF + DOCX export</li>
-        <li>Client portal links</li>
+        <li>Template library</li>
+        <li>DOCX export</li>
+        <li>Voice training</li>
         <li>Priority support</li>
       </ul>
-      <a href="/app/signup?plan=pro" class="btn-outline">Get started</a>
+      <a href="/app/signup?plan=business" class="btn-outline">Get started</a>
+    </div>
+    <div class="pricing-card">
+      <p class="pricing-tier">Agency</p>
+      <p class="pricing-price">$149</p>
+      <p class="pricing-period">per month</p>
+      <ul class="pricing-features">
+        <li>Everything in Business</li>
+        <li>5 team seats</li>
+        <li>White-label PDF exports</li>
+        <li>Bulk generation</li>
+        <li>Dedicated account manager</li>
+      </ul>
+      <a href="mailto:hello@draftbox.app" class="btn-outline">Contact us</a>
     </div>
   </div>
 </section>
@@ -799,19 +377,20 @@
 <!-- CTA -->
 <section class="cta-section">
   <div class="cta-deco">DraftBox</div>
-  <h2>Start writing proposals<br>that <em>actually close</em></h2>
-  <p>Free to try. First 5 documents free. No credit card required.</p>
-  <a href="/app/signup" class="btn-primary" style="font-size:0.9rem; padding: 1rem 2.75rem; position: relative;">Start for free →</a>
+  <h2>Stop writing from scratch.<br><em>Start from a solid draft.</em></h2>
+  <p>Two documents free. No credit card required. All 10 document types available from day one.</p>
+  <p class="cta-disclaimer">DraftBox generates draft documents only. Not legal advice. Review all contracts and agreements with qualified counsel before execution.</p>
+  <a href="/app/signup" class="btn-primary" style="font-size:0.9rem; padding:1rem 2.75rem; position:relative;">Try DraftBox free →</a>
 </section>
 
 <footer>
   <a href="/" class="logo" style="font-size:1.1rem;">Draft<span style="color:var(--rust)">Box</span></a>
-  <div style="display:flex; gap: 2rem;">
+  <div style="display:flex;gap:2rem;">
     <a href="/privacy">Privacy</a>
     <a href="/terms">Terms</a>
     <a href="mailto:hello@draftbox.app">Contact</a>
   </div>
-  <span>© 2025 DraftBox</span>
+  <span>© 2025 DraftBox — Not legal advice</span>
 </footer>
 
 </body>

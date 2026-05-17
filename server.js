@@ -2,8 +2,12 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const fs = require('fs');
 const path = require('path');
+
+const supabase = require('./lib/db');
+const DOC_TYPES = require('./lib/documentTypes');
+const { buildPrompt } = require('./lib/promptBuilder');
+const { exportToDocx } = require('./lib/docxExporter');
 
 const app = express();
 app.use(cors());
@@ -14,22 +18,18 @@ const JWT_SECRET = process.env.JWT_SECRET || 'draftbox_secret_change_in_prod';
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const PORT = process.env.PORT || 3000;
 const ROOT_DIR = __dirname;
-const VALID_PLANS = new Set(['free', 'solo', 'pro']);
 
-// ─── SIMPLE FILE-BASED DB ──────────────────────────────────
-const DB_FILE = path.join(__dirname, 'data', 'db.json');
-if (!fs.existsSync(path.join(__dirname, 'data'))) {
-  fs.mkdirSync(path.join(__dirname, 'data'));
-}
-if (!fs.existsSync(DB_FILE)) {
-  fs.writeFileSync(DB_FILE, JSON.stringify({ users: [], docs: [] }));
+const VALID_PLANS = new Set(['free', 'solo', 'starter', 'pro', 'business', 'agency']);
+
+// ─── PLAN HELPERS ──────────────────────────────────────────
+function planModel(plan) {
+  return (plan === 'free') ? 'claude-haiku-4-5-20251001' : 'claude-sonnet-4-6';
 }
 
-function readDB() {
-  return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
-}
-function writeDB(data) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+function planLimit(plan) {
+  if (plan === 'free')                         return { count: 2,       period: 'total' };
+  if (plan === 'solo' || plan === 'starter')   return { count: 15,      period: 'monthly' };
+  return                                              { count: Infinity, period: 'monthly' };
 }
 
 // ─── AUTH MIDDLEWARE ───────────────────────────────────────
@@ -47,7 +47,7 @@ function authMiddleware(req, res, next) {
   }
 }
 
-// ─── ROUTES ───────────────────────────────────────────────
+// ─── STATIC & PAGE ROUTES ─────────────────────────────────
 function sendPage(res, file) {
   res.sendFile(path.join(ROOT_DIR, file));
 }
@@ -60,52 +60,63 @@ app.get('/app/signup', (req, res) => sendPage(res, 'signup.html'));
 app.get('/app/login', (req, res) => sendPage(res, 'signup.html'));
 app.get('/app/dashboard', (req, res) => sendPage(res, 'dashboard.html'));
 
-// Serve any additional static files from the project root.
 app.use(express.static(ROOT_DIR, { index: false }));
 
-// SIGNUP
+// ─── DOCUMENT TYPE REGISTRY ────────────────────────────────
+app.get('/api/doc-types', (req, res) => {
+  res.json(Object.values(DOC_TYPES));
+});
+
+// ─── AUTH ──────────────────────────────────────────────────
 app.post('/api/auth/signup', async (req, res) => {
   try {
     const { name, email, password, profession, plan } = req.body;
     if (!name || !email || !password) return res.status(400).json({ error: 'Missing required fields' });
 
-    const db = readDB();
-    if (db.users.find(u => u.email === email)) {
-      return res.status(400).json({ error: 'Email already registered' });
-    }
+    const { data: existing } = await supabase.from('users').select('id').eq('email', email).single();
+    if (existing) return res.status(400).json({ error: 'Email already registered' });
 
     const hashed = await bcrypt.hash(password, 10);
     const selectedPlan = VALID_PLANS.has(plan) ? plan : 'free';
-    const user = { id: 'u_' + Date.now(), name, email, password: hashed, profession: profession || '', plan: selectedPlan, created: Date.now() };
-    db.users.push(user);
-    writeDB(db);
+    const user = {
+      id: 'u_' + Date.now(),
+      name,
+      email,
+      password: hashed,
+      profession: profession || '',
+      plan: selectedPlan,
+      voice_profile: '',
+      created: Date.now(),
+    };
+    const { error } = await supabase.from('users').insert(user);
+    if (error) throw error;
 
     const token = jwt.sign({ id: user.id, email, plan: user.plan }, JWT_SECRET, { expiresIn: '30d' });
-    res.json({ success: true, token, user: { id: user.id, name, email, plan: user.plan, profession: user.profession } });
+    res.json({ success: true, token, user: { id: user.id, name, email, plan: user.plan, profession: user.profession, voiceProfile: '' } });
   } catch (err) {
+    console.error('Signup error:', err.message);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-// LOGIN
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    const db = readDB();
-    const user = db.users.find(u => u.email === email);
+    const { data: user } = await supabase.from('users').select('*').eq('email', email).single();
     if (!user) return res.status(400).json({ error: 'Invalid email or password' });
 
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return res.status(400).json({ error: 'Invalid email or password' });
 
     const token = jwt.sign({ id: user.id, email, plan: user.plan }, JWT_SECRET, { expiresIn: '30d' });
-    res.json({ success: true, token, user: { id: user.id, name: user.name, email, plan: user.plan, profession: user.profession } });
-  } catch {
+    res.json({ success: true, token, user: { id: user.id, name: user.name, email, plan: user.plan, profession: user.profession, voiceProfile: user.voice_profile || '' } });
+  } catch (err) {
+    console.error('Login error:', err.message);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-// PLAN UPGRADE (demo-friendly billing placeholder)
+// ─── ACCOUNT ───────────────────────────────────────────────
 app.post('/api/account/plan', authMiddleware, async (req, res) => {
   try {
     const { plan } = req.body;
@@ -116,88 +127,181 @@ app.post('/api/account/plan', authMiddleware, async (req, res) => {
     if (req.user.id === 'demo') {
       return res.json({
         success: true,
-        user: { id: 'demo', name: 'Demo User', email: 'demo@draftbox.app', profession: 'Freelancer', plan },
-        token: 'demo'
+        user: { id: 'demo', name: 'Demo User', email: 'demo@draftbox.app', profession: '', plan, voiceProfile: '' },
+        token: 'demo',
       });
     }
 
-    const db = readDB();
-    const user = db.users.find(entry => entry.id === req.user.id);
+    const { data: user } = await supabase.from('users').select('*').eq('id', req.user.id).single();
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    user.plan = plan;
-    writeDB(db);
+    const { error } = await supabase.from('users').update({ plan }).eq('id', req.user.id);
+    if (error) throw error;
 
-    const token = jwt.sign({ id: user.id, email: user.email, plan: user.plan }, JWT_SECRET, { expiresIn: '30d' });
-    res.json({
-      success: true,
-      token,
-      user: { id: user.id, name: user.name, email: user.email, profession: user.profession, plan: user.plan }
-    });
-  } catch {
+    const token = jwt.sign({ id: user.id, email: user.email, plan }, JWT_SECRET, { expiresIn: '30d' });
+    res.json({ success: true, token, user: { id: user.id, name: user.name, email: user.email, profession: user.profession, plan, voiceProfile: user.voice_profile || '' } });
+  } catch (err) {
+    console.error('Plan update error:', err.message);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-// GENERATE DOCUMENT — core product endpoint
+app.put('/api/account/voice', authMiddleware, async (req, res) => {
+  try {
+    const { voiceProfile } = req.body;
+    if (typeof voiceProfile !== 'string') return res.status(400).json({ error: 'Invalid voice profile' });
+    if (req.user.id === 'demo') return res.json({ success: true });
+
+    const { data: user } = await supabase.from('users').select('id').eq('id', req.user.id).single();
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const { error } = await supabase.from('users').update({ voice_profile: voiceProfile.slice(0, 2000) }).eq('id', req.user.id);
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Voice update error:', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ─── DOCUMENTS ─────────────────────────────────────────────
+app.get('/api/docs', authMiddleware, async (req, res) => {
+  try {
+    if (req.user.id === 'demo') return res.json({ success: true, docs: [] });
+    const { data: rows, error } = await supabase
+      .from('docs')
+      .select('*')
+      .eq('user_id', req.user.id)
+      .order('created', { ascending: false });
+    if (error) throw error;
+    const docs = (rows || []).map(d => ({ ...d, userId: d.user_id }));
+    res.json({ success: true, docs });
+  } catch (err) {
+    console.error('Get docs error:', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.put('/api/docs/:id', authMiddleware, async (req, res) => {
+  try {
+    if (req.user.id === 'demo') return res.json({ success: true });
+    const { content, title } = req.body;
+    const { data: doc } = await supabase
+      .from('docs')
+      .select('id')
+      .eq('id', req.params.id)
+      .eq('user_id', req.user.id)
+      .single();
+    if (!doc) return res.status(404).json({ error: 'Document not found' });
+
+    const updates = {};
+    if (typeof content === 'string') updates.content = content;
+    if (typeof title === 'string') updates.title = title;
+
+    const { error } = await supabase.from('docs').update(updates).eq('id', req.params.id).eq('user_id', req.user.id);
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Update doc error:', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.delete('/api/docs/:id', authMiddleware, async (req, res) => {
+  try {
+    if (req.user.id === 'demo') return res.json({ success: true });
+    const { data: doc } = await supabase
+      .from('docs')
+      .select('id')
+      .eq('id', req.params.id)
+      .eq('user_id', req.user.id)
+      .single();
+    if (!doc) return res.status(404).json({ error: 'Document not found' });
+
+    const { error } = await supabase.from('docs').delete().eq('id', req.params.id).eq('user_id', req.user.id);
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Delete doc error:', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// DOCX EXPORT — Business/Agency only
+app.get('/api/docs/:id/export/docx', authMiddleware, async (req, res) => {
+  try {
+    const { plan } = req.user;
+    if (plan !== 'business' && plan !== 'agency' && plan !== 'pro') {
+      return res.status(403).json({ error: 'DOCX export requires Business plan or higher.' });
+    }
+    if (req.user.id === 'demo') return res.status(403).json({ error: 'Not available in demo mode.' });
+
+    const { data: doc } = await supabase
+      .from('docs')
+      .select('*')
+      .eq('id', req.params.id)
+      .eq('user_id', req.user.id)
+      .single();
+    if (!doc) return res.status(404).json({ error: 'Document not found' });
+
+    const docType = DOC_TYPES[doc.type];
+    const buffer = await exportToDocx({
+      ...doc,
+      userId: doc.user_id,
+      outputStructure: docType ? docType.outputStructure : [],
+    });
+
+    const filename = doc.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.docx';
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(buffer);
+  } catch (err) {
+    console.error('DOCX export error:', err.message);
+    res.status(500).json({ error: 'Export failed' });
+  }
+});
+
+// ─── GENERATE ──────────────────────────────────────────────
 app.post('/api/generate', authMiddleware, async (req, res) => {
-  const { type, client, project, budget, notes, sender, profession } = req.body;
+  const { type, fields = {}, docId: clientDocId } = req.body;
 
-  if (!client || !project) return res.status(400).json({ error: 'Missing client or project' });
+  const docType = DOC_TYPES[type];
+  if (!docType) return res.status(400).json({ error: 'Unknown document type' });
 
-  // Check plan limits
+  const missing = (docType.requiredFields || []).filter(f => !fields[f.key] || !String(fields[f.key]).trim());
+  if (missing.length) {
+    return res.status(400).json({ error: `Missing required fields: ${missing.map(f => f.label).join(', ')}` });
+  }
+
+  let voiceProfile = '';
+
   if (req.user.id !== 'demo') {
-    const db = readDB();
-    const user = db.users.find(u => u.id === req.user.id);
+    const { data: user } = await supabase.from('users').select('*').eq('id', req.user.id).single();
     if (user) {
-      const thisMonthDocs = (db.docs || []).filter(d => {
-        if (d.userId !== user.id) return false;
-        const docDate = new Date(d.created);
-        const now = new Date();
-        return docDate.getMonth() === now.getMonth() && docDate.getFullYear() === now.getFullYear();
-      }).length;
+      voiceProfile = user.voice_profile || '';
+      const { count, period } = planLimit(user.plan);
 
-      const limit = user.plan === 'free' ? 5 : user.plan === 'solo' ? 20 : 9999;
-      if (thisMonthDocs >= limit) {
-        return res.status(429).json({ error: 'Plan limit reached. Please upgrade.' });
+      if (count < Infinity) {
+        const { data: userDocs } = await supabase.from('docs').select('id, created').eq('user_id', user.id);
+        let usedCount;
+        if (period === 'total') {
+          usedCount = (userDocs || []).length;
+        } else {
+          const now = new Date();
+          usedCount = (userDocs || []).filter(d => {
+            const dd = new Date(d.created);
+            return dd.getMonth() === now.getMonth() && dd.getFullYear() === now.getFullYear();
+          }).length;
+        }
+        if (usedCount >= count) {
+          return res.status(429).json({ error: 'Plan limit reached. Please upgrade.' });
+        }
       }
     }
   }
 
-  // Build prompt based on document type
-  const typePrompts = {
-    proposal: `Write a professional project proposal`,
-    sow: `Write a detailed Statement of Work (SOW)`,
-    email: `Write a professional client email`,
-    brief: `Write a project brief`,
-    followup: `Write a follow-up email`,
-    cold: `Write a compelling cold outreach email`
-  };
-
-  const docType = typePrompts[type] || `Write a professional ${type}`;
-  const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-
-  const prompt = `${docType} with these details:
-
-Client/Company: ${client}
-Project: ${project}
-${budget ? `Budget: ${budget}` : ''}
-${notes ? `Key details: ${notes}` : ''}
-${sender ? `From: ${sender}` : ''}
-${profession ? `Service provider is a: ${profession}` : ''}
-Today's date: ${today}
-
-Requirements:
-- Write in a confident, professional yet warm tone
-- Be specific and concrete, not generic
-- Include all relevant sections for this document type
-- For proposals/SOWs: include scope, timeline, pricing breakdown, and next steps
-- For emails: be direct, friendly, and end with a clear call to action
-- Use plain text formatting with clear section headers using dashes or line breaks
-- Do NOT use markdown asterisks or hashtags — use ALL CAPS for headers instead
-- Length: comprehensive but not padded — say what needs to be said
-
-Write the complete document now:`;
+  const { system, userMessage } = buildPrompt(docType, fields, voiceProfile);
+  const model = planModel(req.user.plan);
 
   try {
     if (!ANTHROPIC_API_KEY) throw new Error('No API key');
@@ -207,13 +311,14 @@ Write the complete document now:`;
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
+        'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1500,
-        messages: [{ role: 'user', content: prompt }]
-      })
+        model,
+        max_tokens: 2500,
+        system,
+        messages: [{ role: 'user', content: userMessage }],
+      }),
     });
 
     if (!response.ok) {
@@ -225,30 +330,69 @@ Write the complete document now:`;
     const data = await response.json();
     const content = data.content[0].text;
 
-    // Log usage
+    const primaryKey = docType.requiredFields[0]?.key;
+    const primaryVal = primaryKey ? (fields[primaryKey] || '') : '';
+    const title = `${docType.label}${primaryVal ? ' — ' + primaryVal : ''}`;
+
     if (req.user.id !== 'demo') {
-      const db = readDB();
-      if (!db.docs) db.docs = [];
-      db.docs.push({ userId: req.user.id, type, client, created: Date.now() });
-      writeDB(db);
+      const docId = clientDocId || ('doc_' + Date.now());
+      const { error } = await supabase.from('docs').insert({
+        id: docId,
+        user_id: req.user.id,
+        type,
+        title,
+        fields,
+        content,
+        created: Date.now(),
+      });
+      if (error) throw error;
+      return res.json({ success: true, content, title, docId });
     }
 
-    res.json({ success: true, content });
-
+    res.json({ success: true, content, title });
   } catch (err) {
     console.error('Generate error:', err.message);
     res.status(500).json({ error: 'Generation failed', message: err.message });
   }
 });
 
-// STRIPE WEBHOOK (for subscription management)
+// REGENERATE SINGLE SECTION
+app.post('/api/generate/section', authMiddleware, async (req, res) => {
+  try {
+    const { type, fields = {}, sectionName, currentContent } = req.body;
+    const docType = DOC_TYPES[type];
+    if (!docType || !sectionName) return res.status(400).json({ error: 'Invalid request' });
+    if (!ANTHROPIC_API_KEY) throw new Error('No API key');
+
+    const model = planModel(req.user.plan);
+    const { system } = buildPrompt(docType, fields, '');
+
+    const userMessage = `Here is the current document:\n\n${currentContent}\n\n---\n\nRewrite ONLY the "${sectionName}" section of this document. Keep everything else unchanged. Return the full updated document.`;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({ model, max_tokens: 2500, system, messages: [{ role: 'user', content: userMessage }] }),
+    });
+
+    if (!response.ok) throw new Error('API error');
+    const data = await response.json();
+    res.json({ success: true, content: data.content[0].text });
+  } catch (err) {
+    console.error('Section regen error:', err.message);
+    res.status(500).json({ error: 'Section regeneration failed' });
+  }
+});
+
+// STRIPE WEBHOOK (stub)
 app.post('/api/webhook/stripe', express.raw({ type: 'application/json' }), (req, res) => {
-  // TODO: implement after Stripe setup
-  // Handle checkout.session.completed to upgrade user plan
   res.json({ received: true });
 });
 
-// Health check
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
 app.listen(PORT, () => {
