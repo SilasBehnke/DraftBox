@@ -7,122 +7,120 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --ink: #0f0e0d;
-    --paper: #f5f2ec;
-    --rust: #c2531a;
-    --muted: #6f6a64;
-    --border: #d8d3ca;
+  :root { --ink: #0f0e0d; --paper: #f5f2ec; --rust: #c2531a; --muted: #7a756e; --border: #d8d3ca; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--paper); color: var(--ink); font-family: 'DM Sans', sans-serif; font-weight: 300; line-height: 1.7; }
+  header {
+    border-bottom: 1px solid var(--border); padding: 1.25rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; background: var(--paper); z-index: 10;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: radial-gradient(circle at top, #fff8ef 0%, var(--paper) 52%, #efe8de 100%);
-    color: var(--ink);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-  }
-  .shell {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 2rem 1.5rem 4rem;
-  }
-  .topbar, .footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-  .logo {
-    color: var(--ink);
-    font-family: 'Instrument Serif', serif;
-    font-size: 1.35rem;
-    text-decoration: none;
-  }
+  .logo { font-family: 'Instrument Serif', serif; font-size: 1.2rem; color: var(--ink); text-decoration: none; }
   .logo span { color: var(--rust); }
-  .topbar a, .footer a {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 0.9rem;
+  .back { font-size: 0.82rem; color: var(--muted); text-decoration: none; }
+  .back:hover { color: var(--ink); }
+  .container { max-width: 720px; margin: 0 auto; padding: 3rem 2rem 6rem; }
+  h1 { font-family: 'Instrument Serif', serif; font-size: 2.4rem; letter-spacing: -0.025em; margin-bottom: 0.5rem; }
+  .meta { font-size: 0.82rem; color: var(--muted); margin-bottom: 3rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border); }
+  h2 { font-family: 'Instrument Serif', serif; font-size: 1.2rem; letter-spacing: -0.01em; margin: 2.5rem 0 0.65rem; }
+  p { font-size: 0.9rem; color: #2a2826; margin-bottom: 0.9rem; }
+  ul { font-size: 0.9rem; color: #2a2826; margin: 0.5rem 0 1rem 1.5rem; }
+  ul li { margin-bottom: 0.35rem; }
+  .callout {
+    background: #fff8f5; border-left: 3px solid var(--rust);
+    padding: 1rem 1.25rem; margin: 1.5rem 0; border-radius: 0 2px 2px 0;
   }
-  .card {
-    margin-top: 3rem;
-    background: rgba(255,255,255,0.84);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 2.25rem;
-  }
-  h1 {
-    font-family: 'Instrument Serif', serif;
-    font-size: clamp(2.2rem, 4vw, 3.5rem);
-    letter-spacing: -0.03em;
-    margin-bottom: 0.75rem;
-  }
-  .lede, .meta {
-    color: var(--muted);
-    line-height: 1.7;
-  }
-  .meta { margin-bottom: 2rem; font-size: 0.88rem; }
-  section { margin-top: 1.8rem; }
-  h2 {
-    font-size: 0.82rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 0.7rem;
-  }
-  p, li {
-    color: #2a2723;
-    line-height: 1.8;
-    font-size: 0.98rem;
-  }
-  ul { padding-left: 1.15rem; }
-  .footer {
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border);
-  }
-  @media (max-width: 700px) {
-    .card { padding: 1.5rem; border-radius: 18px; }
-    .topbar, .footer { flex-direction: column; align-items: flex-start; }
-  }
+  .callout p { margin: 0; font-size: 0.88rem; }
+  .caps { font-size: 0.85rem; font-weight: 500; line-height: 1.65; }
+  a { color: var(--rust); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  @media (max-width: 600px) { .container { padding: 2rem 1.25rem 4rem; } h1 { font-size: 1.8rem; } }
 </style>
 </head>
 <body>
-  <div class="shell">
-    <div class="topbar">
-      <a href="/" class="logo">Draft<span>Box</span></a>
-      <a href="/app/login">Sign in</a>
-    </div>
+<header>
+  <a href="/" class="logo">Draft<span>Box</span></a>
+  <a href="/" class="back">← Back to home</a>
+</header>
+<div class="container">
+  <h1>Terms of Service</h1>
+  <p class="meta">Effective: May 17, 2026</p>
 
-    <article class="card">
-      <h1>Terms of Service</h1>
-      <p class="lede">These terms cover the current DraftBox prototype experience. They set expectations for how the app can be used while the product and billing flow are still lightweight.</p>
-      <p class="meta">Last updated: May 6, 2026</p>
+  <h2>1. Acceptance of Terms</h2>
+  <p>These Terms of Service ("Terms") govern your access to and use of DraftBox ("Service"), operated by DraftBox ("Company," "we," "us," "our"). By creating an account, clicking "I agree," or otherwise using the Service, you agree to be bound by these Terms and our <a href="/privacy">Privacy Policy</a>. If you do not agree, do not use the Service.</p>
 
-      <section>
-        <h2>Prototype Use</h2>
-        <p>DraftBox is provided as a working prototype for generating proposals, briefs, emails, and related client documents. Features, storage behavior, and plan controls may change as the app evolves.</p>
-      </section>
+  <h2>2. Description of Service</h2>
+  <p>DraftBox is an AI-assisted tool that generates draft business documents, including statements of work, non-disclosure agreements, master service agreements, request for proposal responses, change orders, and related commercial instruments (collectively, "Documents"). Documents are generated using large language model AI technology and are intended as starting-point drafts only.</p>
 
-      <section>
-        <h2>Account Responsibility</h2>
-        <p>You are responsible for the content you enter, the documents you generate, and the way you use those outputs with your own clients. Please review generated text before sending it externally.</p>
-      </section>
-
-      <section>
-        <h2>Plans And Limits</h2>
-        <p>The current app supports free, Solo, and Pro plan states so navigation and limits can be tested end to end. In this prototype, plan changes may be enabled without a live billing workflow.</p>
-      </section>
-
-      <section>
-        <h2>No Warranty</h2>
-        <p>The service is offered on an as-is basis for evaluation and iteration. There is no guarantee of uninterrupted availability, perfect AI output, or production-grade security in this version.</p>
-      </section>
-
-      <div class="footer">
-        <a href="/privacy">Privacy Policy</a>
-        <a href="/">Back to home</a>
-      </div>
-    </article>
+  <h2>3. NOT LEGAL ADVICE — IMPORTANT DISCLAIMER</h2>
+  <div class="callout">
+    <p><strong>DraftBox is not a law firm and does not provide legal advice, legal representation, or legal services of any kind.</strong> Documents generated by the Service are AI-produced drafts for informational and starting-point purposes only. They do not constitute legal advice and should not be relied upon as such. No attorney-client relationship is created by your use of the Service.</p>
   </div>
+  <p class="caps">ANY DOCUMENT GENERATED BY DRAFTBOX — INCLUDING ANY CONTRACT, AGREEMENT, NDA, OR OTHER LEGAL INSTRUMENT — MUST BE REVIEWED AND, WHERE APPROPRIATE, REVISED BY QUALIFIED LEGAL COUNSEL BEFORE BEING SIGNED, EXECUTED, OR RELIED UPON. THE COMPANY MAKES NO REPRESENTATION OR WARRANTY THAT ANY DOCUMENT IS ACCURATE, COMPLETE, LEGALLY VALID, ENFORCEABLE, OR APPROPRIATE FOR YOUR SPECIFIC SITUATION OR JURISDICTION.</p>
+
+  <h2>4. Eligibility and Account Registration</h2>
+  <p>You must be at least 18 years old to use the Service. By using the Service on behalf of a business or organization, you represent that you have authority to bind that entity to these Terms.</p>
+  <p>You agree to provide accurate, complete information at registration and to keep your credentials confidential. You are responsible for all activity that occurs under your account. Notify us immediately at <a href="mailto:legal@draftbox.app">legal@draftbox.app</a> if you suspect unauthorized access.</p>
+
+  <h2>5. Subscriptions and Payment</h2>
+  <p>DraftBox offers free and paid subscription plans. Paid subscriptions are billed monthly and automatically renew unless canceled before the renewal date. Prices are stated in U.S. dollars and are subject to change with 30 days' notice to existing subscribers. By providing payment information, you authorize us (through our payment processor, Stripe) to charge applicable fees. You are responsible for all applicable taxes.</p>
+
+  <h2>6. Refund Policy</h2>
+  <p>All subscription fees are non-refundable except as required by applicable law. If you believe you were charged in error, contact us at <a href="mailto:legal@draftbox.app">legal@draftbox.app</a> within 30 days of the charge. Refunds may be issued at our sole discretion on a case-by-case basis.</p>
+
+  <h2>7. AI-Generated Content and Your Responsibility</h2>
+  <p>You acknowledge that Documents are generated by AI and may contain errors, inaccuracies, omissions, or language that is unsuitable for your specific circumstances. The Company does not guarantee that any Document is legally sufficient, accurate, or appropriate for any intended purpose.</p>
+  <p>You are solely responsible for reviewing, editing, and verifying any Document before use, execution, or reliance. The Company is not liable for any losses or damages arising from your use of, reliance on, or failure to adequately review any Document.</p>
+
+  <h2>8. Your Content</h2>
+  <p>You retain ownership of any information and content you submit through the Service ("User Content"). By submitting User Content, you grant the Company a non-exclusive, worldwide, royalty-free license to process and store your User Content solely to provide and improve the Service. We do not sell your User Content to third parties.</p>
+  <p>You represent that you have all rights necessary to submit your User Content and that doing so does not violate any third party's rights or any applicable law.</p>
+
+  <h2>9. Third-Party Services</h2>
+  <p>The Service uses Anthropic's Claude AI API to generate Documents. When you submit information to generate a Document, that information is transmitted to Anthropic's servers for processing. We also use Supabase for secure data storage and Stripe for payment processing. We are not responsible for the data practices of these third-party providers. Links to their privacy policies appear in our <a href="/privacy">Privacy Policy</a>.</p>
+
+  <h2>10. Prohibited Uses</h2>
+  <p>You agree not to use the Service to:</p>
+  <ul>
+    <li>Generate documents intended to facilitate illegal activity, fraud, or deception</li>
+    <li>Infringe any third party's intellectual property, privacy, or other rights</li>
+    <li>Circumvent any security measures or access restrictions of the Service</li>
+    <li>Reverse engineer, decompile, or disassemble any portion of the Service</li>
+    <li>Resell or redistribute the Service as a competing product without written authorization</li>
+    <li>Violate any applicable local, state, national, or international law or regulation</li>
+  </ul>
+
+  <h2>11. Intellectual Property</h2>
+  <p>The Service, including its software, design, and non-user-generated content, is owned by the Company and protected by applicable intellectual property laws. These Terms grant you a limited, non-exclusive, non-transferable license to use the Service for your own business purposes. You may not copy, modify, or create derivative works of the Service without our written permission.</p>
+
+  <h2>12. Disclaimer of Warranties</h2>
+  <p class="caps">THE SERVICE AND ALL DOCUMENTS GENERATED THEREBY ARE PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT. THE COMPANY DOES NOT WARRANT THAT THE SERVICE WILL BE ERROR-FREE, UNINTERRUPTED, OR SECURE, OR THAT ANY DOCUMENT WILL BE ACCURATE, LEGALLY VALID, OR FIT FOR ANY PARTICULAR PURPOSE.</p>
+
+  <h2>13. Limitation of Liability</h2>
+  <p class="caps">TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE COMPANY AND ITS OFFICERS, DIRECTORS, EMPLOYEES, AND AGENTS SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES — INCLUDING LOST PROFITS, LOSS OF DATA, BUSINESS INTERRUPTION, OR COST OF SUBSTITUTE SERVICES — ARISING OUT OF OR RELATED TO YOUR USE OF THE SERVICE OR ANY DOCUMENT GENERATED THEREBY, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</p>
+  <p class="caps">IN NO EVENT SHALL THE COMPANY'S TOTAL LIABILITY TO YOU FOR ALL CLAIMS EXCEED THE GREATER OF (A) THE TOTAL FEES YOU PAID TO THE COMPANY IN THE TWELVE (12) MONTHS PRECEDING THE CLAIM OR (B) ONE HUNDRED U.S. DOLLARS ($100.00).</p>
+
+  <h2>14. Indemnification</h2>
+  <p>You agree to indemnify, defend, and hold harmless the Company and its officers, directors, employees, and agents from and against any claims, liabilities, damages, losses, and expenses (including reasonable attorneys' fees) arising out of or connected with: (a) your use of the Service; (b) your User Content; (c) your violation of these Terms; or (d) your use, execution, or reliance on any Document without obtaining appropriate professional or legal review.</p>
+
+  <h2>15. Dispute Resolution and Arbitration</h2>
+  <p>Any dispute arising out of or relating to these Terms or the Service that cannot be resolved informally shall be resolved by binding individual arbitration administered by the American Arbitration Association under its Commercial Arbitration Rules. The arbitration shall take place in the State of Delaware. Either party may seek emergency injunctive relief in any court of competent jurisdiction.</p>
+  <p class="caps">YOU AND THE COMPANY EACH WAIVE THE RIGHT TO A JURY TRIAL AND TO PARTICIPATE IN ANY CLASS ACTION, CLASS ARBITRATION, OR REPRESENTATIVE PROCEEDING. ALL CLAIMS MUST BE BROUGHT INDIVIDUALLY.</p>
+
+  <h2>16. Governing Law</h2>
+  <p>These Terms are governed by the laws of the State of Delaware, without regard to its conflict of law provisions. Subject to the arbitration agreement above, any legal action shall be brought exclusively in the state or federal courts located in Delaware.</p>
+
+  <h2>17. Changes to These Terms</h2>
+  <p>We may update these Terms from time to time. We will notify you of material changes by email or by posting a notice in the Service at least 14 days before changes take effect. Your continued use of the Service after the effective date constitutes acceptance of the revised Terms.</p>
+
+  <h2>18. Termination</h2>
+  <p>We may suspend or terminate your access at any time for conduct that violates these Terms or is harmful to other users, the Company, or third parties. You may cancel your account at any time by contacting us. Sections 3, 7, 12, 13, 14, 15, and 16 survive termination.</p>
+
+  <h2>19. Entire Agreement</h2>
+  <p>These Terms constitute the entire agreement between you and the Company regarding the Service and supersede all prior agreements. If any provision is found unenforceable, the remaining provisions remain in full force. Our failure to enforce any provision is not a waiver of our right to do so later. You may not assign your rights under these Terms without our written consent.</p>
+
+  <h2>20. Contact</h2>
+  <p>Questions about these Terms? Email us at <a href="mailto:legal@draftbox.app">legal@draftbox.app</a>.</p>
+</div>
 </body>
 </html>

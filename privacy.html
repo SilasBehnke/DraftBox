@@ -7,124 +7,115 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --ink: #0f0e0d;
-    --paper: #f5f2ec;
-    --cream: #ede9e0;
-    --rust: #c2531a;
-    --muted: #6f6a64;
-    --border: #d8d3ca;
+  :root { --ink: #0f0e0d; --paper: #f5f2ec; --rust: #c2531a; --muted: #7a756e; --border: #d8d3ca; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--paper); color: var(--ink); font-family: 'DM Sans', sans-serif; font-weight: 300; line-height: 1.7; }
+  header {
+    border-bottom: 1px solid var(--border); padding: 1.25rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; background: var(--paper); z-index: 10;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: linear-gradient(180deg, var(--paper) 0%, #f0ebe2 100%);
-    color: var(--ink);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-  }
-  .shell {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 2rem 1.5rem 4rem;
-  }
-  .topbar, .footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-  .logo {
-    color: var(--ink);
-    font-family: 'Instrument Serif', serif;
-    font-size: 1.35rem;
-    text-decoration: none;
-  }
+  .logo { font-family: 'Instrument Serif', serif; font-size: 1.2rem; color: var(--ink); text-decoration: none; }
   .logo span { color: var(--rust); }
-  .topbar a, .footer a {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 0.9rem;
-  }
-  .card {
-    margin-top: 3rem;
-    background: rgba(255,255,255,0.82);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 2.25rem;
-    backdrop-filter: blur(14px);
-  }
-  h1 {
-    font-family: 'Instrument Serif', serif;
-    font-size: clamp(2.2rem, 4vw, 3.5rem);
-    letter-spacing: -0.03em;
-    margin-bottom: 0.75rem;
-  }
-  .lede, .meta {
-    color: var(--muted);
-    line-height: 1.7;
-  }
-  .meta { margin-bottom: 2rem; font-size: 0.88rem; }
-  section { margin-top: 1.8rem; }
-  h2 {
-    font-size: 0.82rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 0.7rem;
-  }
-  p, li {
-    color: #2a2723;
-    line-height: 1.8;
-    font-size: 0.98rem;
-  }
-  ul { padding-left: 1.15rem; }
-  .footer {
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border);
-  }
-  @media (max-width: 700px) {
-    .card { padding: 1.5rem; border-radius: 18px; }
-    .topbar, .footer { flex-direction: column; align-items: flex-start; }
-  }
+  .back { font-size: 0.82rem; color: var(--muted); text-decoration: none; }
+  .back:hover { color: var(--ink); }
+  .container { max-width: 720px; margin: 0 auto; padding: 3rem 2rem 6rem; }
+  h1 { font-family: 'Instrument Serif', serif; font-size: 2.4rem; letter-spacing: -0.025em; margin-bottom: 0.5rem; }
+  .meta { font-size: 0.82rem; color: var(--muted); margin-bottom: 3rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border); }
+  h2 { font-family: 'Instrument Serif', serif; font-size: 1.2rem; letter-spacing: -0.01em; margin: 2.5rem 0 0.65rem; }
+  p { font-size: 0.9rem; color: #2a2826; margin-bottom: 0.9rem; }
+  ul { font-size: 0.9rem; color: #2a2826; margin: 0.5rem 0 1rem 1.5rem; }
+  ul li { margin-bottom: 0.35rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin: 1rem 0 1.5rem; }
+  th { text-align: left; font-weight: 500; padding: 0.6rem 0.75rem; background: #ede9e0; border: 1px solid var(--border); color: var(--ink); }
+  td { padding: 0.6rem 0.75rem; border: 1px solid var(--border); color: #2a2826; vertical-align: top; }
+  a { color: var(--rust); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  @media (max-width: 600px) { .container { padding: 2rem 1.25rem 4rem; } h1 { font-size: 1.8rem; } table { font-size: 0.8rem; } }
 </style>
 </head>
 <body>
-  <div class="shell">
-    <div class="topbar">
-      <a href="/" class="logo">Draft<span>Box</span></a>
-      <a href="/app/signup">Start free</a>
-    </div>
+<header>
+  <a href="/" class="logo">Draft<span>Box</span></a>
+  <a href="/" class="back">← Back to home</a>
+</header>
+<div class="container">
+  <h1>Privacy Policy</h1>
+  <p class="meta">Effective: May 17, 2026</p>
 
-    <article class="card">
-      <h1>Privacy Policy</h1>
-      <p class="lede">DraftBox is built to help freelancers draft client-facing documents faster. This page explains, in plain language, what data the current app stores and how it is used.</p>
-      <p class="meta">Last updated: May 6, 2026</p>
+  <p>DraftBox ("we," "us," "our") is committed to protecting your privacy. This Privacy Policy explains what information we collect, how we use it, and your rights regarding that information. By using the Service, you agree to the practices described here.</p>
 
-      <section>
-        <h2>What We Collect</h2>
-        <p>The app stores the account details you provide at signup, the plan you select, and the document metadata needed to show your dashboard history. During local demo use, some document state is also stored in your browser's local storage.</p>
-      </section>
+  <h2>1. Information We Collect</h2>
+  <p>We collect the following categories of information:</p>
+  <table>
+    <tr><th>Category</th><th>Examples</th><th>How collected</th></tr>
+    <tr><td>Account information</td><td>Name, email address, professional description</td><td>You provide at registration</td></tr>
+    <tr><td>Document inputs</td><td>Party names, project descriptions, dates, dollar amounts you enter into generation forms</td><td>You provide when generating a document</td></tr>
+    <tr><td>Generated documents</td><td>The AI-produced document text</td><td>Created by the Service and stored for your access</td></tr>
+    <tr><td>Payment information</td><td>Billing name, last 4 digits of card, billing address</td><td>Collected by Stripe on our behalf; we do not store full card numbers</td></tr>
+    <tr><td>Usage data</td><td>Pages visited, features used, timestamps, browser type</td><td>Collected automatically when you use the Service</td></tr>
+  </table>
 
-      <section>
-        <h2>How It Is Used</h2>
-        <p>Your information is used to sign you in, track your selected plan, and generate or save document drafts. If an AI API key is configured on the server, document details may be sent to that provider so DraftBox can generate content for you.</p>
-      </section>
+  <h2>2. How We Use Your Information</h2>
+  <p>We use the information we collect to:</p>
+  <ul>
+    <li>Provide, operate, and maintain the Service</li>
+    <li>Generate Documents based on your inputs using Anthropic's AI API</li>
+    <li>Process payments and manage your subscription</li>
+    <li>Send transactional emails (account confirmation, billing receipts, password resets)</li>
+    <li>Respond to your support requests</li>
+    <li>Detect and prevent fraud, abuse, or violations of our Terms of Service</li>
+    <li>Improve the Service based on aggregate usage patterns (we do not use your specific document content for model training without your consent)</li>
+  </ul>
+  <p>We do not use your information to send unsolicited marketing communications, and we do not sell your personal information to third parties.</p>
 
-      <section>
-        <h2>Storage</h2>
-        <p>This build uses a simple file-backed datastore on the server and browser local storage on the client. It is suitable for prototype use and internal testing, but it is not intended to be treated as a hardened production deployment.</p>
-      </section>
+  <h2>3. How We Share Your Information</h2>
+  <p>We share information only with the following service providers, as necessary to operate the Service:</p>
+  <table>
+    <tr><th>Provider</th><th>Purpose</th><th>Data shared</th></tr>
+    <tr><td><strong>Anthropic, PBC</strong></td><td>AI document generation</td><td>Your form inputs are transmitted to Anthropic's API to produce document drafts. See <a href="https://www.anthropic.com/legal/privacy" target="_blank">Anthropic's Privacy Policy</a>.</td></tr>
+    <tr><td><strong>Supabase</strong></td><td>Database storage</td><td>Account information and document data. See <a href="https://supabase.com/privacy" target="_blank">Supabase's Privacy Policy</a>.</td></tr>
+    <tr><td><strong>Stripe, Inc.</strong></td><td>Payment processing</td><td>Billing information. See <a href="https://stripe.com/privacy" target="_blank">Stripe's Privacy Policy</a>.</td></tr>
+  </table>
+  <p>We may also disclose your information if required by law, regulation, or legal process, or to protect the rights, property, or safety of DraftBox, our users, or the public.</p>
 
-      <section>
-        <h2>Your Choices</h2>
-        <p>You can stop using the app at any time, clear your local browser data, or contact the site owner to remove server-side records from the prototype datastore.</p>
-      </section>
+  <h2>4. Document Input and AI Processing</h2>
+  <p>When you generate a document, the information you enter into the form — including business names, project descriptions, financial figures, and other details — is transmitted to Anthropic's API servers to produce the AI-generated output. <strong>Do not enter sensitive personal information (such as Social Security numbers, bank account numbers, or government ID numbers) into document generation forms.</strong> Anthropic's data handling practices are governed by their privacy policy linked above.</p>
 
-      <div class="footer">
-        <a href="/terms">Terms of Service</a>
-        <a href="/">Back to home</a>
-      </div>
-    </article>
-  </div>
+  <h2>5. Data Retention</h2>
+  <p>We retain your account information and generated documents for as long as your account remains active. If you delete your account, we will delete your personal data within 30 days, except where we are required by law to retain it longer. Anonymized or aggregated data that cannot identify you may be retained indefinitely for analytics purposes.</p>
+
+  <h2>6. Cookies and Local Storage</h2>
+  <p>We use browser <strong>localStorage</strong> to store your session token and to cache your document list locally on your device for performance. We do not use third-party advertising or tracking cookies. Standard server logs may capture your IP address and browser information as part of normal web operations.</p>
+
+  <h2>7. Security</h2>
+  <p>We implement industry-standard security measures including encrypted data transmission (HTTPS/TLS), encrypted database storage, and hashed passwords. However, no system is completely secure. We cannot guarantee the absolute security of your information, and we encourage you to use a strong, unique password and to not share your login credentials.</p>
+
+  <h2>8. Your Rights and Choices</h2>
+  <p>Depending on your location, you may have the following rights regarding your personal information:</p>
+  <ul>
+    <li><strong>Access:</strong> Request a copy of the personal information we hold about you</li>
+    <li><strong>Correction:</strong> Request that we correct inaccurate or incomplete information</li>
+    <li><strong>Deletion:</strong> Request that we delete your account and associated personal data</li>
+    <li><strong>Portability:</strong> Request your data in a portable format</li>
+    <li><strong>Objection:</strong> Object to certain uses of your information</li>
+  </ul>
+  <p>To exercise any of these rights, contact us at <a href="mailto:legal@draftbox.app">legal@draftbox.app</a>. We will respond within 30 days. We may need to verify your identity before fulfilling requests.</p>
+
+  <h2>9. California Privacy Rights (CCPA)</h2>
+  <p>If you are a California resident, you have additional rights under the California Consumer Privacy Act (CCPA), including the right to know what personal information we collect and how it is used, the right to request deletion of your personal information, and the right to opt out of the sale of your personal information. <strong>We do not sell personal information.</strong> To exercise your CCPA rights, contact us at <a href="mailto:legal@draftbox.app">legal@draftbox.app</a>.</p>
+
+  <h2>10. Children's Privacy</h2>
+  <p>The Service is not directed to individuals under the age of 18, and we do not knowingly collect personal information from anyone under 18. If we learn that we have collected personal information from a child under 18, we will delete it promptly. If you believe we have inadvertently collected such information, please contact us immediately at <a href="mailto:legal@draftbox.app">legal@draftbox.app</a>.</p>
+
+  <h2>11. International Data Transfers</h2>
+  <p>DraftBox is operated in the United States. If you access the Service from outside the United States, your information will be transferred to, stored, and processed in the United States, where data protection laws may differ from those in your country. By using the Service, you consent to this transfer.</p>
+
+  <h2>12. Changes to This Policy</h2>
+  <p>We may update this Privacy Policy from time to time to reflect changes in our practices or applicable law. We will notify you of material changes by email or by posting a prominent notice in the Service at least 14 days before the changes take effect. Your continued use of the Service after the effective date constitutes acceptance of the updated policy.</p>
+
+  <h2>13. Contact</h2>
+  <p>Questions, concerns, or requests regarding this Privacy Policy? Contact us at <a href="mailto:legal@draftbox.app">legal@draftbox.app</a>. We will respond within 30 days.</p>
+</div>
 </body>
 </html>

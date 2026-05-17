@@ -131,10 +131,17 @@
         <input type="text" id="profession" placeholder="e.g. Brand designer, developer, consultant">
       </div>
 
+      <div id="terms-check-group">
+        <div class="legal-check-row" style="margin-top:1.5rem">
+          <input type="checkbox" id="terms-ack">
+          <label for="terms-ack" style="font-size:0.8rem;text-transform:none;letter-spacing:0;font-weight:300;color:var(--muted);cursor:pointer">
+            I agree to the <a href="/terms" target="_blank" style="color:var(--rust)">Terms of Service</a> and <a href="/privacy" target="_blank" style="color:var(--rust)">Privacy Policy</a>. I understand DraftBox generates AI drafts only and is not a substitute for legal counsel.
+          </label>
+        </div>
+      </div>
+
       <button type="submit" class="btn-full" id="auth-btn">Create account →</button>
     </form>
-
-    <p class="terms">By signing up you agree to our <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a></p>
   </div>
 </div>
 <!-- LEGAL ACKNOWLEDGMENT MODAL (shown once to new visitors) -->
@@ -166,7 +173,8 @@ function applyMode() {
   const professionInput = document.getElementById('profession');
   const passwordInput = document.getElementById('password');
   const button = document.getElementById('auth-btn');
-  const terms = document.querySelector('.terms');
+  const termsGroup = document.getElementById('terms-check-group');
+  const termsAck = document.getElementById('terms-ack');
   const planNote = document.getElementById('plan-note');
 
   if (isLoginMode) {
@@ -179,7 +187,8 @@ function applyMode() {
     nameInput.required = false;
     professionInput.required = false;
     passwordInput.removeAttribute('minlength');
-    terms.classList.add('hidden');
+    termsGroup.classList.add('hidden');
+    termsAck.required = false;
   } else {
     document.title = 'DraftBox — Sign up';
     title.textContent = 'Create your account';
@@ -189,7 +198,8 @@ function applyMode() {
     professionGroup.classList.remove('hidden');
     nameInput.required = true;
     passwordInput.setAttribute('minlength', '8');
-    terms.classList.remove('hidden');
+    termsGroup.classList.remove('hidden');
+    termsAck.required = true;
   }
 
   if (selectedPlan && !isLoginMode) {
